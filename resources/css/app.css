@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-white font-body text-mega-text antialiased;
+        font-weight: 400;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-heading text-mega-black;
+        font-weight: 500;
+    }
+
+    p {
+        @apply text-mega-muted;
+    }
+}
+
+@layer components {
+    .site-container {
+        @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8;
+    }
+
+    .radius-7 {
+        border-radius: 7px;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-2 bg-mega-orange px-5 py-3 text-sm font-medium text-white transition hover:bg-mega-orangeDark;
+        border-radius: 7px;
+    }
+
+    .btn-dark {
+        @apply inline-flex items-center justify-center gap-2 bg-mega-black px-5 py-3 text-sm font-medium text-white transition hover:bg-mega-dark;
+        border-radius: 7px;
+    }
+
+    .btn-light {
+        @apply inline-flex items-center justify-center gap-2 border border-mega-line bg-white px-5 py-3 text-sm font-medium text-mega-text transition hover:border-mega-orange hover:text-mega-orange;
+        border-radius: 7px;
+    }
+
+    .section-label {
+        @apply mb-3 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-mega-orange;
+    }
+
+    .section-title {
+        @apply text-3xl leading-tight tracking-tight text-mega-black md:text-4xl lg:text-5xl;
+        font-weight: 500;
+    }
+
+    .section-text {
+        @apply mt-4 max-w-2xl text-base leading-7 text-mega-muted;
+    }
+
+    .clean-card {
+        @apply border border-mega-line bg-white shadow-soft transition;
+        border-radius: 7px;
+    }
+
+    .clean-card-hover {
+        @apply hover:-translate-y-1 hover:border-mega-orange/40 hover:shadow-soft;
+    }
+
+    .thin-icon {
+        @apply h-5 w-5;
+        stroke-width: 1.5;
+    }
+
+    .input-clean {
+        @apply w-full border border-mega-line bg-white px-4 py-3 text-sm text-mega-text outline-none transition placeholder:text-mega-muted/70 focus:border-mega-orange focus:ring-4 focus:ring-orange-500/10;
+        border-radius: 7px;
+    }
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.radius-7 {
+    border-radius: 7px;
+}
+
+.clean-card {
+    @apply border border-mega-line bg-white shadow-soft transition;
+    border-radius: 7px;
+}
