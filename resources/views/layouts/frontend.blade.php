@@ -17,19 +17,14 @@
 <body class="bg-white">
     @include('partials.frontend.header')
 
-    {{--
-    Header is fixed, so main needs top padding.
-    Desktop header height:
-    40px black bar + 82px main header + 58px product nav = 180px
-
-    Mobile/tablet:
-    36px black bar + 82px main header = around 118px
-    --}}
-    <main class="pt-[118px] lg:pt-[180px]">
+    <main>
         @yield('content')
     </main>
 
     @include('partials.frontend.footer')
+
+    {{-- This must be global so it works on homepage, products page, details page, quote page, contact page --}}
+    @include('partials.frontend.global-actions')
 </body>
 
 </html>

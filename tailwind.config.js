@@ -1,35 +1,35 @@
-/** @type {import('tailwindcss').Config} */
+const defaultTheme = require('tailwindcss/defaultTheme');
+
 module.exports = {
   content: [
-    "./resources/**/*.blade.php",
-    "./resources/**/*.js",
-    "./resources/**/*.vue",
+    './resources/**/*.blade.php',
+    './resources/**/*.js',
+    './resources/**/*.vue',
   ],
 
   theme: {
     extend: {
       fontFamily: {
-        heading: ['"Space Grotesk"', 'sans-serif'],
-        body: ['"Outfit"', 'sans-serif'],
+        sans: ['Outfit', ...defaultTheme.fontFamily.sans],
+        heading: ['Space Grotesk', ...defaultTheme.fontFamily.sans],
       },
 
       colors: {
         mega: {
-          orange: "#ff5a0a",
-          orangeDark: "#e64a00",
-          black: "#070707",
-          dark: "#171717",
-          text: "#242424",
-          muted: "#6d6d6d",
-          soft: "#f7f4f1",
-          cream: "#fbf7f2",
-          line: "#e8e2dd",
+          orange: '#ff5a00',
+          orangeDark: '#e64d00',
+          black: '#050505',
+          text: '#2d2927',
+          muted: '#6d6874',
+          soft: '#f8f5f1',
+          cream: '#f3eee7',
+          line: '#e8e1da',
         },
       },
 
       boxShadow: {
-        soft: "0 18px 45px rgba(7,7,7,0.08)",
-        glow: "0 18px 40px rgba(255,90,10,0.18)",
+        soft: '0 18px 50px rgba(7, 7, 7, 0.08)',
+        premium: '0 28px 80px rgba(7, 7, 7, 0.14)',
       },
     },
   },
