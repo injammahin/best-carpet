@@ -9,7 +9,7 @@ use App\Models\ProductCategory;
 use App\Models\ProductRange;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-
+use Illuminate\Support\Str;
 class PageController extends Controller
 {
 public function home(): View
@@ -490,4 +490,118 @@ public function home(): View
     {
         return view('frontend.contact');
     }
+    public function searchSuggestions(Request $request)
+{
+    $search = trim((string) $request->query('q', ''));
+    $categorySlug = trim((string) $request->query('category', ''));
+
+    if (mb_strlen($search) < 2) {
+        return response()->json([
+            'query' => $search,
+            'all_results_url' => route('frontend.products', array_filter([
+                'q' => $search,
+                'category' => $categorySlug,
+            ])),
+            'suggestions' => [],
+        ]);
+    }
+
+    $selectedCategory = null;
+
+    if ($categorySlug !== '') {
+        $selectedCategory = ProductCategory::active()
+            ->where('slug', $categorySlug)
+            ->first();
+    }
+
+    $products = ProductRange::active()
+        ->with(['category', 'subcategory', 'colours'])
+        ->when($selectedCategory, function ($query) use ($selectedCategory) {
+            if ($selectedCategory->parent_id) {
+                $query->where('subcategory_id', $selectedCategory->id);
+            } else {
+                $query->where('category_id', $selectedCategory->id);
+            }
+        })
+        ->where(function ($query) use ($search) {
+            $query
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('slug', 'like', "%{$search}%")
+                ->orWhere('short_description', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('room', 'like', "%{$search}%")
+                ->orWhere('colour_group', 'like', "%{$search}%")
+                ->orWhere('size_group', 'like', "%{$search}%")
+                ->orWhereHas('category', function ($categoryQuery) use ($search) {
+                    $categoryQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                })
+                ->orWhereHas('subcategory', function ($subcategoryQuery) use ($search) {
+                    $subcategoryQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                })
+                ->orWhereHas('colours', function ($colourQuery) use ($search) {
+                    $colourQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('colour_group', 'like', "%{$search}%");
+                });
+        })
+        ->orderBy('sort_order')
+        ->orderBy('name')
+        ->take(6)
+        ->get()
+        ->map(function ($product) {
+            return [
+                'type' => 'product',
+                'badge' => 'Product',
+                'title' => $product->name,
+                'subtitle' => collect([
+                    $product->category?->name,
+                    $product->subcategory?->name,
+                    $product->room,
+                ])->filter()->join(' · '),
+                'image' => $product->imageUrl(),
+                'url' => route('frontend.product.show', $product->slug),
+            ];
+        });
+
+    $categories = ProductCategory::active()
+        ->where(function ($query) use ($search) {
+            $query
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('slug', 'like', "%{$search}%")
+                ->orWhere('short_description', 'like', "%{$search}%");
+        })
+        ->orderBy('parent_id')
+        ->orderBy('sort_order')
+        ->orderBy('name')
+        ->take(4)
+        ->get()
+        ->map(function ($category) {
+            return [
+                'type' => 'category',
+                'badge' => $category->parent_id ? 'Type' : 'Category',
+                'title' => $category->name,
+                'subtitle' => Str::limit($category->short_description ?: 'Browse matching flooring products.', 80),
+                'image' => $category->image_url ?: null,
+                'url' => route('frontend.product.show', $category->slug),
+            ];
+        });
+
+    $suggestions = $products
+        ->merge($categories)
+        ->values()
+        ->all();
+
+    return response()->json([
+        'query' => $search,
+        'all_results_url' => route('frontend.products', array_filter([
+            'q' => $search,
+            'category' => $categorySlug,
+        ])),
+        'suggestions' => $suggestions,
+    ]);
+}
 }

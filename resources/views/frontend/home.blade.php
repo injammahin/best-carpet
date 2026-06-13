@@ -370,8 +370,8 @@
                     </h2>
 
                     <p class="section-lead">
-                        Showing the first 8 {{ $defaultHomeCategoryName }} products. Select another category to view its
-                        first 8 products.
+                        Browse selected {{ $defaultHomeCategoryName }} ranges, compare colours, check indicative pricing and
+                        save your favourites before booking a free measure and quote.
                     </p>
                 </div>
 

@@ -35,6 +35,8 @@ Route::name('frontend.')->group(function () {
     Route::get('/about-us', [PageController::class, 'aboutUs'])->name('about-us');
     Route::get('/inspiration', [PageController::class, 'inspiration'])->name('inspiration');
     Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+    Route::get('/search-suggestions', [PageController::class, 'searchSuggestions'])
+    ->name('search.suggestions');
 
     /*
     |--------------------------------------------------------------------------

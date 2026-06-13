@@ -61,6 +61,10 @@
     }
 }
 
+.section-lead {
+    font-size: 15px;
+}
+
 /* Header */
 .mega-header {
     position: fixed;

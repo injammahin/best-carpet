@@ -235,21 +235,39 @@
 
     <div data-header-search class="header-search-panel">
         <div class="site-container">
-            <form action="{{ route('frontend.products') }}" method="GET" class="header-search-box">
+            <form action="{{ route('frontend.products') }}" method="GET" class="header-search-box"
+                data-header-search-form>
                 <div>
                     <p class="section-kicker mb-2">Search flooring</p>
+
                     <h3 class="text-2xl font-extrabold tracking-tight text-mega-black">
                         Find carpet, timber, hybrid, laminate, vinyl and rugs.
                     </h3>
                 </div>
 
                 <div class="grid gap-3 lg:grid-cols-[1fr_220px_auto]">
-                    <input type="search" name="q" class="input-clean" placeholder="Search by product, colour or room">
+                    <div class="relative">
+                        <input type="search" name="q" value="{{ request('q') }}" class="input-clean pr-12"
+                            placeholder="Search by product, colour or room" autocomplete="off" data-search-input
+                            data-suggestion-url="{{ route('frontend.search.suggestions') }}">
 
-                    <select name="category" class="input-clean">
+                        <button type="button" data-search-input-clear
+                            class="absolute right-4 top-1/2 hidden -translate-y-1/2 text-xl font-black text-mega-muted hover:text-mega-orange"
+                            aria-label="Clear search">
+                            ×
+                        </button>
+
+                        <div data-search-suggestions
+                            class="absolute left-0 right-0 top-[calc(100%+10px)] z-[120] hidden max-h-[420px] overflow-y-auto overscroll-contain border border-mega-line bg-white shadow-premium radius-7"
+                            style="scrollbar-width: thin;">
+                        </div>
+                    </div>
+
+                    <select name="category" class="input-clean" data-search-category>
                         <option value="">All categories</option>
+
                         @foreach($searchCategories as $category)
-                            <option value="{{ $category->slug }}">
+                            <option value="{{ $category->slug }}" @selected(request('category') === $category->slug)>
                                 {{ $category->name }}
                             </option>
                         @endforeach
@@ -431,4 +449,212 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-header-search-form]').forEach(function (form) {
+                const input = form.querySelector('[data-search-input]');
+                const category = form.querySelector('[data-search-category]');
+                const suggestionsBox = form.querySelector('[data-search-suggestions]');
+                const clearButton = form.querySelector('[data-search-input-clear]');
+
+                let timer = null;
+                let controller = null;
+
+                if (!input || !suggestionsBox) {
+                    return;
+                }
+
+                function hideSuggestions() {
+                    suggestionsBox.classList.add('hidden');
+                    suggestionsBox.innerHTML = '';
+                }
+
+                function showLoading() {
+                    suggestionsBox.innerHTML = `
+                    <div class="p-4 text-sm font-semibold text-mega-muted">
+                        Searching products...
+                    </div>
+                `;
+
+                    suggestionsBox.scrollTop = 0;
+                    suggestionsBox.classList.remove('hidden');
+                }
+
+                function createSuggestionItem(item) {
+                    const link = document.createElement('a');
+
+                    link.href = item.url || '#';
+                    link.className = 'flex items-center gap-3 border-b border-mega-line px-4 py-3 transition hover:bg-mega-soft';
+
+                    const imageWrap = document.createElement('div');
+                    imageWrap.className = 'grid h-12 w-12 shrink-0 place-items-center overflow-hidden bg-mega-soft text-xs font-black text-mega-orange radius-7';
+
+                    if (item.image) {
+                        const image = document.createElement('img');
+                        image.src = item.image;
+                        image.alt = item.title || 'Search result';
+                        image.className = 'h-full w-full object-cover';
+                        imageWrap.appendChild(image);
+                    } else {
+                        imageWrap.textContent = item.type === 'category' ? 'CAT' : 'PRO';
+                    }
+
+                    const textWrap = document.createElement('div');
+                    textWrap.className = 'min-w-0 flex-1';
+
+                    const title = document.createElement('p');
+                    title.className = 'truncate text-sm font-black text-mega-black';
+                    title.textContent = item.title || '';
+
+                    const subtitle = document.createElement('p');
+                    subtitle.className = 'mt-1 truncate text-xs font-semibold text-mega-muted';
+                    subtitle.textContent = item.subtitle || '';
+
+                    textWrap.appendChild(title);
+                    textWrap.appendChild(subtitle);
+
+                    const badge = document.createElement('span');
+                    badge.className = 'shrink-0 rounded-full bg-mega-orange/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-mega-orange';
+                    badge.textContent = item.badge || 'Result';
+
+                    link.appendChild(imageWrap);
+                    link.appendChild(textWrap);
+                    link.appendChild(badge);
+
+                    return link;
+                }
+
+                function renderSuggestions(data) {
+                    suggestionsBox.innerHTML = '';
+
+                    const query = data.query || input.value.trim();
+                    const allResultsUrl = data.all_results_url || form.action;
+
+                    const viewAll = document.createElement('a');
+                    viewAll.href = allResultsUrl;
+                    viewAll.className = 'sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-mega-line bg-mega-cream px-4 py-4 transition hover:bg-mega-orange hover:text-white';
+
+                    const viewAllText = document.createElement('div');
+
+                    const viewAllTitle = document.createElement('p');
+                    viewAllTitle.className = 'text-sm font-black';
+                    viewAllTitle.textContent = 'View all results';
+
+                    const viewAllSubtitle = document.createElement('p');
+                    viewAllSubtitle.className = 'mt-1 text-xs font-semibold opacity-75';
+                    viewAllSubtitle.textContent = query ? 'Search for "' + query + '"' : 'Open product results';
+
+                    viewAllText.appendChild(viewAllTitle);
+                    viewAllText.appendChild(viewAllSubtitle);
+
+                    const arrow = document.createElement('span');
+                    arrow.className = 'text-xl font-black';
+                    arrow.textContent = '→';
+
+                    viewAll.appendChild(viewAllText);
+                    viewAll.appendChild(arrow);
+
+                    suggestionsBox.appendChild(viewAll);
+
+                    if (data.suggestions && data.suggestions.length) {
+                        data.suggestions.forEach(function (item) {
+                            suggestionsBox.appendChild(createSuggestionItem(item));
+                        });
+                    } else {
+                        const empty = document.createElement('div');
+                        empty.className = 'px-4 py-5 text-sm font-semibold text-mega-muted';
+                        empty.textContent = 'No exact suggestion found. Press Search or click View all results.';
+                        suggestionsBox.appendChild(empty);
+                    }
+
+                    suggestionsBox.scrollTop = 0;
+                    suggestionsBox.classList.remove('hidden');
+                }
+
+                async function fetchSuggestions() {
+                    const query = input.value.trim();
+
+                    clearButton?.classList.toggle('hidden', query.length === 0);
+
+                    if (query.length < 2) {
+                        hideSuggestions();
+                        return;
+                    }
+
+                    if (controller) {
+                        controller.abort();
+                    }
+
+                    controller = new AbortController();
+
+                    const params = new URLSearchParams();
+                    params.set('q', query);
+
+                    if (category && category.value) {
+                        params.set('category', category.value);
+                    }
+
+                    showLoading();
+
+                    try {
+                        const response = await fetch(input.dataset.suggestionUrl + '?' + params.toString(), {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            signal: controller.signal
+                        });
+
+                        if (!response.ok) {
+                            hideSuggestions();
+                            return;
+                        }
+
+                        const data = await response.json();
+
+                        renderSuggestions(data);
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            hideSuggestions();
+                        }
+                    }
+                }
+
+                input.addEventListener('input', function () {
+                    clearTimeout(timer);
+
+                    timer = setTimeout(fetchSuggestions, 250);
+                });
+
+                input.addEventListener('focus', function () {
+                    if (input.value.trim().length >= 2) {
+                        fetchSuggestions();
+                    }
+                });
+
+                category?.addEventListener('change', function () {
+                    if (input.value.trim().length >= 2) {
+                        fetchSuggestions();
+                    }
+                });
+
+                clearButton?.addEventListener('click', function () {
+                    input.value = '';
+                    hideSuggestions();
+                    clearButton.classList.add('hidden');
+                    input.focus();
+                });
+
+                document.addEventListener('click', function (event) {
+                    if (!form.contains(event.target)) {
+                        hideSuggestions();
+                    }
+                });
+
+                form.addEventListener('submit', function () {
+                    hideSuggestions();
+                });
+            });
+        });
+    </script>
 </header>
