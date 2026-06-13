@@ -101,7 +101,11 @@
         ->values()
         ->all();
 @endphp
-
+@php
+    $adminUrl = auth()->check() && auth()->user()?->is_admin
+        ? route('admin.dashboard')
+        : route('admin.login');
+@endphp
 <header data-mega-header class="mega-header">
     @if($topbarLeft || $topbarMiddle || $topbarRight)
         <div class="mega-topbar desktop-only">
@@ -159,7 +163,7 @@
                         </button>
 
                         @if($showAdminLogin)
-                            <a href="{{ url('/admin/login') }}" class="premium-icon-button" aria-label="Admin login">
+                            <a href="{{ $adminUrl }}" class="premium-icon-button" aria-label="Admin login">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <circle cx="12" cy="8" r="4" />
                                     <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
