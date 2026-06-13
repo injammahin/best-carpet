@@ -12,30 +12,55 @@ use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function home(): View
-    {
-        $categories = ProductCategory::active()
-            ->whereNull('parent_id')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->take(4)
-            ->get()
-            ->map(fn ($category) => [
-                'name' => $category->name,
-                'slug' => $category->slug,
-                'text' => $category->short_description ?: 'Premium flooring range for modern homes and commercial spaces.',
-                'image' => $category->image_url ?: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
-            ])
-            ->values()
-            ->all();
+public function home(): View
+{
+    $mainCategorySlugs = [
+        'carpet',
+        'timber',
+        'hybrid-flooring',
+        'laminate',
+        'vinyl',
+        'rugs',
+    ];
 
-        $products = ProductRange::active()
+    $categoryModels = ProductCategory::active()
+        ->whereNull('parent_id')
+        ->whereIn('slug', $mainCategorySlugs)
+        ->orderByRaw("FIELD(slug, 'carpet', 'timber', 'hybrid-flooring', 'laminate', 'vinyl', 'rugs')")
+        ->get();
+
+    $categories = $categoryModels
+        ->map(fn ($category) => [
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'text' => $category->short_description ?: 'Premium flooring range for modern homes and commercial spaces.',
+            'image' => $category->image_url ?: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
+        ])
+        ->values()
+        ->all();
+
+    $homeFilterCategories = $categoryModels
+        ->map(fn ($category) => [
+            'name' => $category->name,
+            'slug' => $category->slug,
+        ])
+        ->values()
+        ->all();
+
+    $defaultHomeCategorySlug = $homeFilterCategories[0]['slug'] ?? null;
+    $defaultHomeCategoryName = $homeFilterCategories[0]['name'] ?? 'Products';
+
+    $categoryProductGroups = [];
+
+    foreach ($categoryModels as $category) {
+        $categoryProductGroups[$category->slug] = ProductRange::active()
             ->with([
                 'category',
                 'subcategory',
                 'colours',
                 'prices.sizeOption',
             ])
+            ->where('category_id', $category->id)
             ->orderBy('sort_order')
             ->orderByDesc('created_at')
             ->take(8)
@@ -43,27 +68,36 @@ class PageController extends Controller
             ->map(fn ($product) => $this->homeProductCard($product))
             ->values()
             ->all();
-
-        $reviews = CustomerReview::active()
-            ->featured()
-            ->with('productRange')
-            ->orderBy('sort_order')
-            ->latest()
-            ->take(12)
-            ->get();
-
-        $faqs = Faq::active()
-            ->orderBy('sort_order')
-            ->orderBy('question')
-            ->get();
-
-        return view('frontend.home', [
-            'categories' => $categories,
-            'products' => $products,
-            'reviews' => $reviews,
-            'faqs' => $faqs,
-        ]);
     }
+
+    $products = $defaultHomeCategorySlug
+        ? ($categoryProductGroups[$defaultHomeCategorySlug] ?? [])
+        : [];
+
+    $reviews = CustomerReview::active()
+        ->featured()
+        ->with('productRange')
+        ->orderBy('sort_order')
+        ->latest()
+        ->take(12)
+        ->get();
+
+    $faqs = Faq::active()
+        ->orderBy('sort_order')
+        ->orderBy('question')
+        ->get();
+
+    return view('frontend.home', [
+        'categories' => $categories,
+        'products' => $products,
+        'homeFilterCategories' => $homeFilterCategories,
+        'categoryProductGroups' => $categoryProductGroups,
+        'defaultHomeCategorySlug' => $defaultHomeCategorySlug,
+        'defaultHomeCategoryName' => $defaultHomeCategoryName,
+        'reviews' => $reviews,
+        'faqs' => $faqs,
+    ]);
+}
 
     private function homeProductCard(ProductRange $product): array
     {

@@ -249,7 +249,7 @@
                     them on the homepage.</p>
             </div>
 
-            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 @foreach($categories as $category)
                     <a href="{{ route('frontend.product.show', $category['slug']) }}"
                         class="group overflow-hidden bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-premium radius-7">
@@ -338,19 +338,45 @@
         </div>
     </section>
 
-    <section id="products" class="bg-white py-20">
+    <section id="products" class="bg-white py-16" data-home-products>
+        @php
+            $defaultHomeCategorySlug = $defaultHomeCategorySlug ?? (($homeFilterCategories[0]['slug'] ?? null));
+            $defaultHomeCategoryName = $defaultHomeCategoryName ?? (($homeFilterCategories[0]['name'] ?? 'Products'));
+
+            $homeProductSets = [];
+
+            foreach (($categoryProductGroups ?? []) as $categorySlug => $categoryProducts) {
+                $homeProductSets[$categorySlug] = $categoryProducts;
+            }
+
+            $homeRoomOptions = collect($homeProductSets)
+                ->flatMap(fn($items) => $items)
+                ->pluck('room')
+                ->filter()
+                ->unique()
+                ->sort()
+                ->values();
+
+            $totalInitialProducts = count($homeProductSets[$defaultHomeCategorySlug] ?? []);
+        @endphp
+
         <div class="site-container">
-            <div class="mb-9 grid gap-6 lg:grid-cols-[1fr_620px] lg:items-end">
+            <div class="mb-8 grid gap-6 lg:grid-cols-[1fr_620px] lg:items-end">
                 <div class="max-w-3xl">
                     <p class="section-kicker">Featured products</p>
-                    <h2 class="section-title-premium">Select colour, choose type and see the price.</h2>
+
+                    <h2 class="section-title-premium">
+                        Select colour, choose type and see the price.
+                    </h2>
+
                     <p class="section-lead">
-                        Showing up to 8 featured product ranges from the admin product catalogue.
+                        Showing the first 8 {{ $defaultHomeCategoryName }} products. Select another category to view its
+                        first 8 products.
                     </p>
                 </div>
 
                 <div class="border border-mega-line bg-white p-4 shadow-soft radius-7">
-                    <div class="grid gap-3 sm:grid-cols-[1fr_160px_160px]">
+                    <div class="grid gap-3 sm:grid-cols-[1fr_180px_160px]">
                         <div class="relative">
                             <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-mega-muted thin-home-icon"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -358,21 +384,25 @@
                                 <path d="M20 20l-3.5-3.5" />
                             </svg>
 
-                            <input data-product-search type="search" placeholder="Search products..."
+                            <input data-home-product-search type="search" placeholder="Search products..."
                                 class="input-clean pl-11">
                         </div>
 
-                        <select data-category-filter class="input-clean">
-                            <option>All</option>
-                            @foreach(collect($products)->pluck('category')->unique()->values() as $categoryName)
-                                <option>{{ $categoryName }}</option>
+                        <select data-home-category-filter class="input-clean">
+                            @foreach(($homeFilterCategories ?? []) as $category)
+                                <option value="{{ $category['slug'] }}" @selected($category['slug'] === $defaultHomeCategorySlug)>
+                                    {{ $category['name'] }}
+                                </option>
                             @endforeach
                         </select>
 
-                        <select data-room-filter class="input-clean">
-                            <option>All</option>
-                            @foreach(collect($products)->pluck('room')->unique()->values() as $roomName)
-                                <option>{{ $roomName }}</option>
+                        <select data-home-room-filter class="input-clean">
+                            <option value="all">All Rooms</option>
+
+                            @foreach($homeRoomOptions as $roomName)
+                                <option value="{{ $roomName }}">
+                                    {{ $roomName }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -388,7 +418,10 @@
                         <path d="M7 12h10" />
                         <path d="M10 17h4" />
                     </svg>
-                    <span data-product-count>{{ count($products) }} products showing</span>
+
+                    <span data-home-product-count>
+                        {{ $totalInitialProducts }} products showing
+                    </span>
                 </div>
 
                 <a href="{{ route('frontend.quote') }}" class="hidden text-sm font-medium text-mega-orange md:inline-flex">
@@ -397,130 +430,227 @@
             </div>
 
             <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                @forelse($products as $product)
-                    @php
-                        $quoteData = [
-                            'id' => $product['id'],
-                            'name' => $product['name'],
-                            'category' => $product['category'],
-                            'slug' => $product['slug'],
-                            'image' => $product['image'],
-                        ];
-                    @endphp
+                @foreach($homeProductSets as $setKey => $setProducts)
+                    @foreach($setProducts as $product)
+                        @php
+                            $quoteData = [
+                                'id' => $product['id'],
+                                'name' => $product['name'],
+                                'category' => $product['category'],
+                                'slug' => $product['slug'],
+                                'image' => $product['image'],
+                            ];
+                        @endphp
 
-                    <article data-product-card data-product-id="{{ $product['id'] }}" data-category="{{ $product['category'] }}"
-                        data-room="{{ $product['room'] }}"
-                        data-search="{{ strtolower($product['name'] . ' ' . $product['category'] . ' ' . $product['room'] . ' ' . $product['tag']) }}"
-                        data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
-                        data-variants='@json($product['variants'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
-                        class="premium-card flooring-product-card group overflow-hidden">
-                        <div class="relative h-60 overflow-hidden bg-mega-soft">
-                            <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
-                                class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                        <article data-product-card data-home-product-card data-home-set="{{ $setKey }}"
+                            data-product-id="{{ $product['id'] }}" data-category="{{ $product['category'] }}"
+                            data-category-slug="{{ $product['category_slug'] ?? '' }}" data-room="{{ $product['room'] }}"
+                            data-search="{{ strtolower($product['name'] . ' ' . $product['category'] . ' ' . $product['room'] . ' ' . $product['tag']) }}"
+                            data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
+                            data-variants='@json($product['variants'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
+                            class="premium-card flooring-product-card group overflow-hidden"
+                            style="{{ $setKey !== $defaultHomeCategorySlug ? 'display:none;' : '' }}">
+                            <div class="relative h-44 overflow-hidden bg-mega-soft">
+                                <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
+                                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
 
-                            <div
-                                class="absolute left-3 top-3 flex items-center gap-2 bg-white/92 px-3 py-2 text-xs font-medium text-mega-black shadow-sm backdrop-blur radius-7">
-                                <svg class="h-3.5 w-3.5 fill-mega-orange text-mega-orange" viewBox="0 0 24 24"
-                                    fill="currentColor">
-                                    <path d="M12 2l2.7 6.8L22 9.3l-5.6 4.7 1.8 7L12 17.2 5.8 21l1.8-7L2 9.3l7.3-.5L12 2z" />
-                                </svg>
-                                <span>{{ $product['rating'] }}</span>
-                            </div>
+                                <div
+                                    class="absolute left-3 top-3 flex items-center gap-2 bg-white/92 px-3 py-1.5 text-xs font-medium text-mega-black shadow-sm backdrop-blur radius-7">
+                                    <svg class="h-3.5 w-3.5 fill-mega-orange text-mega-orange" viewBox="0 0 24 24"
+                                        fill="currentColor">
+                                        <path d="M12 2l2.7 6.8L22 9.3l-5.6 4.7 1.8 7L12 17.2 5.8 21l1.8-7L2 9.3l7.3-.5L12 2z" />
+                                    </svg>
 
-                            <button type="button"
-                                class="wishlist-toggle absolute right-3 top-3 grid h-10 w-10 place-items-center bg-white/92 text-mega-black shadow-sm backdrop-blur transition hover:text-mega-orange radius-7"
-                                data-wishlist-button data-product-id="{{ $product['id'] }}" aria-label="Save favourite">
-                                <svg class="h-5 w-5 thin-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path
-                                        d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div class="p-5">
-                            <div class="mb-3 flex items-center justify-between gap-3">
-                                <span class="rounded-full bg-mega-orange/10 px-3 py-1 text-xs font-medium text-mega-orange">
-                                    {{ $product['tag'] }}
-                                </span>
-                                <span class="text-xs font-medium uppercase tracking-[0.18em] text-mega-muted">
-                                    {{ $product['category'] }}
-                                </span>
-                            </div>
-
-                            <h3
-                                class="min-h-[60px] text-2xl font-semibold uppercase leading-tight tracking-[-0.04em] text-mega-black">
-                                {{ $product['name'] }}
-                            </h3>
-
-                            <div class="mt-4">
-                                <p class="mb-2 text-sm font-medium text-mega-text">Colour</p>
-
-                                <div class="flex flex-wrap gap-2" data-colour-list>
-                                    @foreach($product['variants'] as $index => $variant)
-                                        <button type="button" data-colour-index="{{ $index }}"
-                                            data-colour-name="{{ $variant['name'] }}"
-                                            class="colour-choice h-9 w-9 border border-mega-line shadow-inner radius-7"
-                                            style="background-color: {{ $variant['swatch'] }}" aria-label="{{ $variant['name'] }}">
-                                        </button>
-                                    @endforeach
+                                    <span>{{ $product['rating'] }}</span>
                                 </div>
 
-                                <p class="mt-2 min-h-[20px] text-xs font-medium text-mega-muted" data-selected-colour>
-                                    Select a colour first.
-                                </p>
+                                <button type="button"
+                                    class="wishlist-toggle absolute right-3 top-3 grid h-9 w-9 place-items-center bg-white/92 text-mega-black shadow-sm backdrop-blur transition hover:text-mega-orange radius-7"
+                                    data-wishlist-button data-product-id="{{ $product['id'] }}" aria-label="Save favourite">
+                                    <svg class="h-5 w-5 thin-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path
+                                            d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
+                                    </svg>
+                                </button>
                             </div>
 
-                            <div class="mt-4">
-                                <p class="mb-2 text-sm font-medium text-mega-text">Type</p>
-                                <div class="grid gap-2" data-type-list>
-                                    <button type="button"
-                                        class="type-placeholder input-clean cursor-not-allowed text-left opacity-60" disabled>
-                                        Choose colour first
-                                    </button>
+                            <div class="p-4">
+                                <div class="mb-3 flex items-center justify-between gap-3">
+                                    <span
+                                        class="max-w-[150px] truncate rounded-full bg-mega-orange/10 px-3 py-1 text-xs font-medium text-mega-orange">
+                                        {{ $product['tag'] }}
+                                    </span>
+
+                                    <span class="text-xs font-medium uppercase tracking-[0.18em] text-mega-muted">
+                                        {{ $product['category'] }}
+                                    </span>
                                 </div>
-                            </div>
 
-                            <div class="mt-5 bg-[#f7f3ed] p-4 radius-7">
-                                <div class="flex items-end justify-between gap-3">
-                                    <div>
-                                        <p class="text-xs font-medium uppercase tracking-[0.16em] text-mega-muted">Indicative
-                                            price</p>
-                                        <p class="text-2xl font-semibold text-mega-black" data-price-output>
-                                            Select options
+                                <h3
+                                    class="min-h-[48px] text-xl font-semibold uppercase leading-tight tracking-[-0.04em] text-mega-black">
+                                    {{ $product['name'] }}
+                                </h3>
+
+                                <div class="mt-3">
+                                    <div class="mb-2 flex items-center justify-between">
+                                        <p class="text-sm font-medium text-mega-text">
+                                            Colour
+                                        </p>
+
+                                        <p class="text-xs font-medium text-mega-muted" data-selected-colour>
+                                            Select colour
                                         </p>
                                     </div>
 
-                                    <span class="bg-white px-3 py-2 text-xs font-medium text-mega-text radius-7">
-                                        {{ $product['room'] }}
-                                    </span>
+                                    <div class="flex flex-wrap gap-2" data-colour-list>
+                                        @foreach($product['variants'] as $index => $variant)
+                                            <button type="button" data-colour-index="{{ $index }}"
+                                                data-colour-name="{{ $variant['name'] }}"
+                                                class="colour-choice h-8 w-8 border border-mega-line shadow-inner radius-7"
+                                                style="background-color: {{ $variant['swatch'] }}"
+                                                aria-label="{{ $variant['name'] }}"></button>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="mb-2 text-sm font-medium text-mega-text">
+                                        Type
+                                    </p>
+
+                                    <div class="grid gap-2" data-type-list>
+                                        <button type="button"
+                                            class="type-placeholder input-clean cursor-not-allowed py-3 text-left text-sm opacity-60"
+                                            disabled>
+                                            Choose colour first
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 bg-[#f7f3ed] p-3 radius-7">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-mega-muted">
+                                                Indicative price
+                                            </p>
+
+                                            <p class="text-xl font-semibold leading-tight text-mega-black" data-price-output>
+                                                Select options
+                                            </p>
+                                        </div>
+
+                                        <span
+                                            class="max-w-[110px] truncate bg-white px-3 py-2 text-xs font-medium text-mega-text radius-7">
+                                            {{ $product['room'] }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 grid grid-cols-[1fr_auto] gap-3">
+                                    <button type="button" data-add-quote
+                                        class="btn-primary w-full justify-center py-3 text-sm opacity-60" disabled>
+                                        Add to quote
+                                    </button>
+
+                                    <a href="{{ route('frontend.product.show', $product['slug']) }}"
+                                        class="inline-flex h-11 w-11 items-center justify-center border border-mega-line text-mega-black transition hover:border-mega-orange hover:text-mega-orange radius-7"
+                                        aria-label="View product">
+                                        <svg class="h-5 w-5 thin-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <circle cx="12" cy="12" r="3" />
+                                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                                        </svg>
+                                    </a>
                                 </div>
                             </div>
+                        </article>
+                    @endforeach
+                @endforeach
 
-                            <div class="mt-5 grid grid-cols-[1fr_auto] gap-3">
-                                <button type="button" data-add-quote class="btn-primary w-full justify-center opacity-60"
-                                    disabled>
-                                    Add to quote
-                                </button>
+                <div data-home-empty-products style="display:none;"
+                    class="col-span-full rounded-[7px] border border-mega-line bg-mega-soft p-10 text-center">
+                    <h3 class="text-2xl font-semibold text-mega-black">
+                        No products found.
+                    </h3>
 
-                                <a href="{{ route('frontend.product.show', $product['slug']) }}"
-                                    class="inline-flex h-12 w-12 items-center justify-center border border-mega-line text-mega-black transition hover:border-mega-orange hover:text-mega-orange radius-7"
-                                    aria-label="View product">
-                                    <svg class="h-5 w-5 thin-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <circle cx="12" cy="12" r="3" />
-                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-                @empty
-                    <div class="col-span-full rounded-[24px] border border-mega-line bg-mega-soft p-10 text-center">
-                        <h3 class="text-2xl font-semibold text-mega-black">No products found.</h3>
-                        <p class="mt-2 text-mega-muted">Add active products from the admin product page.</p>
-                    </div>
-                @endforelse
+                    <p class="mt-2 text-mega-muted">
+                        Try another category, room, or search keyword.
+                    </p>
+                </div>
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const section = document.querySelector('[data-home-products]');
+
+                if (!section) {
+                    return;
+                }
+
+                const categoryFilter = section.querySelector('[data-home-category-filter]');
+                const roomFilter = section.querySelector('[data-home-room-filter]');
+                const searchInput = section.querySelector('[data-home-product-search]');
+                const countText = section.querySelector('[data-home-product-count]');
+                const emptyState = section.querySelector('[data-home-empty-products]');
+                const cards = Array.from(section.querySelectorAll('[data-home-product-card]'));
+
+                function applyHomeProductFilters() {
+                    const selectedSet = categoryFilter?.value || '';
+                    const selectedRoom = roomFilter?.value || 'all';
+                    const searchTerm = (searchInput?.value || '').trim().toLowerCase();
+
+                    let visibleCount = 0;
+
+                    cards.forEach(function (card) {
+                        const setMatches = card.dataset.homeSet === selectedSet;
+                        const roomMatches = selectedRoom === 'all' || card.dataset.room === selectedRoom;
+                        const searchMatches = !searchTerm || (card.dataset.search || '').includes(searchTerm);
+
+                        const shouldShow = setMatches && roomMatches && searchMatches;
+
+                        card.style.display = shouldShow ? '' : 'none';
+
+                        if (shouldShow) {
+                            visibleCount++;
+                        }
+                    });
+
+                    if (countText) {
+                        countText.textContent = visibleCount + (visibleCount === 1 ? ' product showing' : ' products showing');
+                    }
+
+                    if (emptyState) {
+                        emptyState.style.display = visibleCount === 0 ? '' : 'none';
+                    }
+                }
+
+                categoryFilter?.addEventListener('change', function () {
+                    if (searchInput) {
+                        searchInput.value = '';
+                    }
+
+                    if (roomFilter) {
+                        roomFilter.value = 'all';
+                    }
+
+                    setTimeout(applyHomeProductFilters, 0);
+                });
+
+                roomFilter?.addEventListener('change', function () {
+                    setTimeout(applyHomeProductFilters, 0);
+                });
+
+                searchInput?.addEventListener('input', function () {
+                    setTimeout(applyHomeProductFilters, 0);
+                });
+
+                cards.forEach(function (card) {
+                    card.style.display = card.dataset.homeSet === (categoryFilter?.value || '') ? '' : 'none';
+                });
+
+                applyHomeProductFilters();
+            });
+        </script>
     </section>
 
     <section id="shop-room" class="bg-[#f7f3ed] py-20">
