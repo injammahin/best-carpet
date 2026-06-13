@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+@php
+    use App\Models\SiteSetting;
+
+    try {
+        $adminSettings = SiteSetting::frontend();
+    } catch (\Throwable $e) {
+        $adminSettings = SiteSetting::defaults();
+    }
+
+    $adminFavicon = SiteSetting::imageUrl($adminSettings['favicon'] ?? null, '/favicon.ico');
+@endphp
 
 <head>
     <meta charset="UTF-8">
-
+    @if($adminFavicon)
+        <link rel="icon" type="image/png" href="{{ $adminFavicon }}">
+        <link rel="shortcut icon" href="{{ $adminFavicon }}">
+    @endif
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>@yield('title', 'Admin Panel | Mega Carpets')</title>
@@ -42,7 +56,8 @@
         " @keydown.escape.window="sidebarOpen = false" class="min-h-screen">
         @include('partials.admin.sidebar')
 
-        <div class="min-h-screen transition-all duration-300" :class="sidebarCollapsed ? 'lg:pl-[92px]' : 'lg:pl-72'">
+        <div class="min-h-screen transition-all duration-300 lg:pl-72"
+            :class="sidebarCollapsed ? 'lg:!pl-[92px]' : 'lg:!pl-72'">
             @include('partials.admin.topbar')
 
             <main class="p-4 sm:p-6 lg:p-8">

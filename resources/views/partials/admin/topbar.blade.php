@@ -1,3 +1,7 @@
+@php
+    $adminUnreadQuoteCount = \App\Models\QuoteRequest::whereNull('read_at')->count();
+@endphp
+
 <header class="sticky top-0 z-30 border-b border-mega-line bg-white/85 backdrop-blur-xl">
     <div class="flex h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div class="flex min-w-0 items-center gap-4">
@@ -26,14 +30,11 @@
                     </span>
                 </div>
 
-                <p class="mt-1 hidden text-sm text-mega-muted sm:block">
-                    Manage products, quote requests, showroom content and website settings.
-                </p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <div class="hidden xl:block">
+            {{-- <div class="hidden xl:block">
                 <div class="relative">
                     <svg class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-mega-muted" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="1.5">
@@ -45,7 +46,7 @@
                         class="w-80 border border-mega-line bg-white py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-mega-muted/70 focus:border-mega-orange focus:ring-4 focus:ring-orange-500/10 radius-7"
                         placeholder="Search products, quotes...">
                 </div>
-            </div>
+            </div> --}}
 
             <a href="{{ route('frontend.home') }}" target="_blank"
                 class="hidden items-center gap-2 border border-mega-line bg-white px-4 py-3 text-sm font-medium text-mega-text shadow-sm transition hover:border-mega-orange hover:text-mega-orange radius-7 md:inline-flex">
@@ -57,15 +58,22 @@
                 View Website
             </a>
 
-            <button type="button"
-                class="relative flex h-11 w-11 items-center justify-center border border-mega-line bg-white text-mega-black shadow-sm transition hover:border-mega-orange hover:text-mega-orange radius-7">
+
+            <a href="{{ route('admin.quote-requests.index', ['status' => 'unread']) }}"
+                class="relative flex h-11 w-11 items-center justify-center border border-mega-line bg-white text-mega-black shadow-sm transition hover:border-mega-orange hover:text-mega-orange radius-7"
+                title="Unread quote requests">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9z" />
                     <path d="M10 21h4" />
                 </svg>
 
-                <span class="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-mega-orange"></span>
-            </button>
+                @if($adminUnreadQuoteCount > 0)
+                    <span
+                        class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-mega-orange px-1 text-[10px] font-bold text-white">
+                        {{ $adminUnreadQuoteCount > 99 ? '99+' : $adminUnreadQuoteCount }}
+                    </span>
+                @endif
+            </a>
 
             <div
                 class="hidden items-center gap-3 border border-mega-line bg-white px-3 py-2 shadow-sm radius-7 sm:flex">

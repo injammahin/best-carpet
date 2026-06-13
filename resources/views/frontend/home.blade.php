@@ -11,367 +11,104 @@
                 'eyebrow' => 'Premium flooring showroom',
                 'title' => 'Choose a floor. Book a consultation. Get a clear quote.',
                 'text' => 'Browse carpet, vinyl, timber and laminate ranges, save your favourites, then request a free measure and quote.',
-                'image' => 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1900&q=90',
+                'image' => '/images/Carpet Pic.webp',
             ],
             [
                 'eyebrow' => 'Quote-first product journey',
                 'title' => 'A showroom experience with stronger visual impact.',
                 'text' => 'Clean product cards, premium category blocks, room inspiration and quote-ready product selection.',
-                'image' => 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1900&q=90',
+                'image' => '/images/Timber Flooring Pic -2 .webp',
             ],
             [
                 'eyebrow' => 'Built for flooring enquiries',
                 'title' => 'Browse ranges, compare options and save products.',
                 'text' => 'Customers select colour, type and price indication before adding products to their quote list.',
-                'image' => 'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1900&q=90',
+                'image' => '/images/Background Pic 2.webp',
             ],
         ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dynamic data from PageController
+        |--------------------------------------------------------------------------
+        | Do not create static $categories, $products, $reviews or $faqs here.
+        | These variables are coming from PageController@home.
+        |--------------------------------------------------------------------------
+        */
+
+        $categories = $categories ?? [];
+        $products = $products ?? [];
+        $reviews = $reviews ?? collect();
+        $faqs = $faqs ?? collect();
+
         $brandVan = asset('images/Mega small van wrap idea.png');
 
         $mascotImage = file_exists(public_path('images/mega-mascot.png'))
             ? asset('images/mega-mascot.png')
             : asset('images/mega man logo.png');
 
-        $categories = [
-            [
-                'name' => 'Carpet',
-                'slug' => 'carpet',
-                'text' => 'Soft, warm and quiet comfort for bedrooms, lounges and family spaces.',
-                'image' => 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
-            ],
-            [
-                'name' => 'Vinyl',
-                'slug' => 'vinyl',
-                'text' => 'Water-resistant planks for kitchens, laundries and busy family zones.',
-                'image' => 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80',
-            ],
-            [
-                'name' => 'Timber',
-                'slug' => 'timber',
-                'text' => 'Natural character, long-term value and a strong premium interior feel.',
-                'image' => 'https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=1200&q=80',
-            ],
-            [
-                'name' => 'Laminate',
-                'slug' => 'laminate',
-                'text' => 'Practical hard flooring with a clean look and excellent everyday value.',
-                'image' => 'https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?auto=format&fit=crop&w=1200&q=80',
-            ],
-        ];
-
-        $products = [
-            [
-                'id' => 1,
-                'name' => 'First Avenue Plush Carpet',
-                'slug' => 'carpet',
-                'category' => 'Carpet',
-                'room' => 'Bedroom',
-                'tag' => 'Best for bedrooms',
-                'rating' => 4.9,
-                'image' => 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Warm Beige',
-                        'swatch' => '#d8cfc0',
-                        'types' => [
-                            ['label' => 'Bedroom Supply', 'price' => 42],
-                            ['label' => 'Bedroom Supply + Install', 'price' => 68],
-                            ['label' => 'Premium Underlay Package', 'price' => 82],
-                        ],
-                    ],
-                    [
-                        'name' => 'Soft Taupe',
-                        'swatch' => '#b7a896',
-                        'types' => [
-                            ['label' => 'Bedroom Supply', 'price' => 45],
-                            ['label' => 'Bedroom Supply + Install', 'price' => 72],
-                            ['label' => 'Premium Underlay Package', 'price' => 86],
-                        ],
-                    ],
-                    [
-                        'name' => 'Deep Stone',
-                        'swatch' => '#5f544a',
-                        'types' => [
-                            ['label' => 'Bedroom Supply', 'price' => 48],
-                            ['label' => 'Bedroom Supply + Install', 'price' => 75],
-                            ['label' => 'Premium Underlay Package', 'price' => 89],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id' => 2,
-                'name' => 'Avenue Oak Hybrid Vinyl',
-                'slug' => 'vinyl',
-                'category' => 'Vinyl',
-                'room' => 'Kitchen',
-                'tag' => 'Water resistant',
-                'rating' => 4.8,
-                'image' => 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Honey Oak',
-                        'swatch' => '#d9b47f',
-                        'types' => [
-                            ['label' => 'Kitchen Supply', 'price' => 54],
-                            ['label' => 'Kitchen Supply + Install', 'price' => 79],
-                            ['label' => 'Waterproof Package', 'price' => 92],
-                        ],
-                    ],
-                    [
-                        'name' => 'Natural Oak',
-                        'swatch' => '#c3955d',
-                        'types' => [
-                            ['label' => 'Kitchen Supply', 'price' => 57],
-                            ['label' => 'Kitchen Supply + Install', 'price' => 82],
-                            ['label' => 'Waterproof Package', 'price' => 95],
-                        ],
-                    ],
-                    [
-                        'name' => 'Walnut Oak',
-                        'swatch' => '#7e5638',
-                        'types' => [
-                            ['label' => 'Kitchen Supply', 'price' => 59],
-                            ['label' => 'Kitchen Supply + Install', 'price' => 84],
-                            ['label' => 'Waterproof Package', 'price' => 98],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id' => 3,
-                'name' => 'Heritage Blackbutt Timber',
-                'slug' => 'timber',
-                'category' => 'Timber',
-                'room' => 'Living Room',
-                'tag' => 'Premium timber',
-                'rating' => 4.9,
-                'image' => 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Blackbutt',
-                        'swatch' => '#e0c28e',
-                        'types' => [
-                            ['label' => 'Living Room Supply', 'price' => 88],
-                            ['label' => 'Living Room Supply + Install', 'price' => 118],
-                            ['label' => 'Premium Timber Package', 'price' => 135],
-                        ],
-                    ],
-                    [
-                        'name' => 'Golden Oak',
-                        'swatch' => '#caa46e',
-                        'types' => [
-                            ['label' => 'Living Room Supply', 'price' => 91],
-                            ['label' => 'Living Room Supply + Install', 'price' => 122],
-                            ['label' => 'Premium Timber Package', 'price' => 139],
-                        ],
-                    ],
-                    [
-                        'name' => 'Warm Walnut',
-                        'swatch' => '#755131',
-                        'types' => [
-                            ['label' => 'Living Room Supply', 'price' => 96],
-                            ['label' => 'Living Room Supply + Install', 'price' => 128],
-                            ['label' => 'Premium Timber Package', 'price' => 146],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id' => 4,
-                'name' => 'Metro Stone Laminate',
-                'slug' => 'laminate',
-                'category' => 'Laminate',
-                'room' => 'Hallway',
-                'tag' => 'Scratch resistant',
-                'rating' => 4.7,
-                'image' => 'https://images.unsplash.com/photo-1616137422495-1e9e46e2aa77?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Cool Grey',
-                        'swatch' => '#c9c5bb',
-                        'types' => [
-                            ['label' => 'Hallway Supply', 'price' => 39],
-                            ['label' => 'Hallway Supply + Install', 'price' => 61],
-                            ['label' => 'Scratch Resistant Package', 'price' => 72],
-                        ],
-                    ],
-                    [
-                        'name' => 'Ash Grey',
-                        'swatch' => '#9e978e',
-                        'types' => [
-                            ['label' => 'Hallway Supply', 'price' => 42],
-                            ['label' => 'Hallway Supply + Install', 'price' => 64],
-                            ['label' => 'Scratch Resistant Package', 'price' => 76],
-                        ],
-                    ],
-                    [
-                        'name' => 'Charcoal',
-                        'swatch' => '#68615a',
-                        'types' => [
-                            ['label' => 'Hallway Supply', 'price' => 45],
-                            ['label' => 'Hallway Supply + Install', 'price' => 68],
-                            ['label' => 'Scratch Resistant Package', 'price' => 81],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id' => 5,
-                'name' => 'Alpine Wool Blend Carpet',
-                'slug' => 'carpet',
-                'category' => 'Carpet',
-                'room' => 'Living Room',
-                'tag' => 'Quiet comfort',
-                'rating' => 5.0,
-                'image' => 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Soft Cream',
-                        'swatch' => '#eee8dd',
-                        'types' => [
-                            ['label' => 'Living Room Supply', 'price' => 67],
-                            ['label' => 'Living Room Supply + Install', 'price' => 94],
-                            ['label' => 'Wool Blend Package', 'price' => 108],
-                        ],
-                    ],
-                    [
-                        'name' => 'Warm Taupe',
-                        'swatch' => '#9d8c78',
-                        'types' => [
-                            ['label' => 'Living Room Supply', 'price' => 69],
-                            ['label' => 'Living Room Supply + Install', 'price' => 98],
-                            ['label' => 'Wool Blend Package', 'price' => 112],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id' => 6,
-                'name' => 'Coastal Oak Laminate',
-                'slug' => 'laminate',
-                'category' => 'Laminate',
-                'room' => 'Dining',
-                'tag' => 'Family friendly',
-                'rating' => 4.8,
-                'image' => 'https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Coastal Oak',
-                        'swatch' => '#f0d5a2',
-                        'types' => [
-                            ['label' => 'Dining Supply', 'price' => 45],
-                            ['label' => 'Dining Supply + Install', 'price' => 69],
-                            ['label' => 'Family Package', 'price' => 80],
-                        ],
-                    ],
-                    [
-                        'name' => 'Honey Oak',
-                        'swatch' => '#b98545',
-                        'types' => [
-                            ['label' => 'Dining Supply', 'price' => 47],
-                            ['label' => 'Dining Supply + Install', 'price' => 72],
-                            ['label' => 'Family Package', 'price' => 84],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id' => 7,
-                'name' => 'Urban Charcoal Vinyl Plank',
-                'slug' => 'vinyl',
-                'category' => 'Vinyl',
-                'room' => 'Bathroom',
-                'tag' => 'Wet area choice',
-                'rating' => 4.8,
-                'image' => 'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Charcoal',
-                        'swatch' => '#2b2b2b',
-                        'types' => [
-                            ['label' => 'Bathroom Supply', 'price' => 52],
-                            ['label' => 'Bathroom Supply + Install', 'price' => 77],
-                            ['label' => 'Wet Area Package', 'price' => 90],
-                        ],
-                    ],
-                    [
-                        'name' => 'Slate Grey',
-                        'swatch' => '#595959',
-                        'types' => [
-                            ['label' => 'Bathroom Supply', 'price' => 55],
-                            ['label' => 'Bathroom Supply + Install', 'price' => 81],
-                            ['label' => 'Wet Area Package', 'price' => 94],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id' => 8,
-                'name' => 'Executive Loop Commercial Carpet',
-                'slug' => 'carpet',
-                'category' => 'Carpet',
-                'room' => 'Commercial',
-                'tag' => 'Commercial fitout',
-                'rating' => 4.7,
-                'image' => 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80',
-                'variants' => [
-                    [
-                        'name' => 'Graphite',
-                        'swatch' => '#565650',
-                        'types' => [
-                            ['label' => 'Commercial Supply', 'price' => 49],
-                            ['label' => 'Commercial Supply + Install', 'price' => 74],
-                            ['label' => 'Heavy Traffic Package', 'price' => 89],
-                        ],
-                    ],
-                    [
-                        'name' => 'Charcoal Black',
-                        'swatch' => '#292925',
-                        'types' => [
-                            ['label' => 'Commercial Supply', 'price' => 53],
-                            ['label' => 'Commercial Supply + Install', 'price' => 78],
-                            ['label' => 'Heavy Traffic Package', 'price' => 93],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-
         $services = [
-            ['title' => 'Free Measure & Quote', 'text' => 'Customers submit room details and the team follows up with accurate quote support.'],
-            ['title' => 'Design Consultation', 'text' => 'Guide buyers by room, colour, material, durability, budget and style direction.'],
-            ['title' => 'Supply & Installation', 'text' => 'Position Mega Carpets as a complete flooring partner from selection to installation.'],
-            ['title' => 'Commercial Flooring', 'text' => 'Business-ready carpet, vinyl and laminate options for offices, shops and rentals.'],
+            [
+                'title' => 'Free Measure & Quote',
+                'text' => 'Customers submit room details and the team follows up with accurate quote support.',
+            ],
+            [
+                'title' => 'Design Consultation',
+                'text' => 'Guide buyers by room, colour, material, durability, budget and style direction.',
+            ],
+            [
+                'title' => 'Supply & Installation',
+                'text' => 'Position Mega Carpets as a complete flooring partner from selection to installation.',
+            ],
+            [
+                'title' => 'Commercial Flooring',
+                'text' => 'Business-ready carpet, vinyl and laminate options for offices, shops and rentals.',
+            ],
         ];
 
         $projects = [
-            ['title' => 'Family lounge refresh', 'type' => 'Soft carpet installation', 'location' => 'Residential home', 'image' => 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80'],
-            ['title' => 'Modern apartment upgrade', 'type' => 'Hybrid vinyl planks', 'location' => 'Apartment living', 'image' => 'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1000&q=80'],
-            ['title' => 'Retail showroom finish', 'type' => 'Laminate and entrance carpet', 'location' => 'Commercial fitout', 'image' => 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1000&q=80'],
-        ];
-
-        $styles = [
-            ['title' => 'Retreat Home', 'text' => 'A calm, layered room direction built around warm flooring, soft rugs and quiet neutral colours.', 'image' => 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=1200&q=80'],
-            ['title' => 'Pick Your Perfect Pile', 'text' => 'A practical guide for customers choosing between plush, loop, twist and wool blend carpets.', 'image' => 'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1200&q=80'],
-            ['title' => 'Hard Flooring Fit for Purpose', 'text' => 'Help customers compare timber, vinyl and laminate by traffic, moisture, pets and maintenance.', 'image' => 'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1200&q=80'],
+            [
+                'title' => 'Family lounge refresh',
+                'type' => 'Soft carpet installation',
+                'location' => 'Residential home',
+                'image' => 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80',
+            ],
+            [
+                'title' => 'Modern apartment upgrade',
+                'type' => 'Hybrid vinyl planks',
+                'location' => 'Apartment living',
+                'image' => 'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1000&q=80',
+            ],
+            [
+                'title' => 'Retail showroom finish',
+                'type' => 'Laminate and entrance carpet',
+                'location' => 'Commercial fitout',
+                'image' => 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1000&q=80',
+            ],
         ];
 
         $roomItems = [
-            ['type' => 'Curtains/Sheers', 'name' => 'Bali Driftwood', 'color' => '#dcd8cd'],
-            ['type' => 'Rugs', 'name' => 'Retreat Weave', 'color' => '#bcae96'],
-            ['type' => 'Timber', 'name' => 'Parky Summit', 'color' => '#c9a77b'],
-            ['type' => 'Carpet', 'name' => 'Aston Soft Pile', 'color' => '#9e9284'],
+            [
+                'type' => 'Curtains/Sheers',
+                'name' => 'Bali Driftwood',
+                'color' => '#dcd8cd',
+            ],
+            [
+                'type' => 'Rugs',
+                'name' => 'Retreat Weave',
+                'color' => '#bcae96',
+            ],
+            [
+                'type' => 'Timber',
+                'name' => 'Parky Summit',
+                'color' => '#c9a77b',
+            ],
+            [
+                'type' => 'Carpet',
+                'name' => 'Aston Soft Pile',
+                'color' => '#9e9284',
+            ],
         ];
-
-        $faqs = [
-            ['question' => 'Can customers buy online?', 'answer' => 'This demo is designed for quote and booking, not direct checkout. Customers save products and request a consultation.'],
-            ['question' => 'Can this become a full e-commerce website later?', 'answer' => 'Yes. Cart, payment, delivery and order management can be added later without changing the premium catalogue structure.'],
-            ['question' => 'Can the product data come from an admin panel?', 'answer' => 'Yes. Products, rooms, colours, prices and images can later come from Laravel admin.'],
-            ['question' => 'Can you add store locations?', 'answer' => 'Yes. The current design includes location CTAs and can be connected to a store locator or Google Maps.'],
-        ];
-
-        $brandVan = asset('images/Mega small van wrap idea.png');
     @endphp
 
     <section id="top" class="relative overflow-hidden bg-mega-black px-3 pb-4 sm:px-5">
@@ -608,8 +345,7 @@
                     <p class="section-kicker">Featured products</p>
                     <h2 class="section-title-premium">Select colour, choose type and see the price.</h2>
                     <p class="section-lead">
-                        Product cards are functional with colour selection, type selection, dynamic indicative price,
-                        wishlist and quote basket.
+                        Showing up to 8 featured product ranges from the admin product catalogue.
                     </p>
                 </div>
 
@@ -628,21 +364,16 @@
 
                         <select data-category-filter class="input-clean">
                             <option>All</option>
-                            <option>Carpet</option>
-                            <option>Vinyl</option>
-                            <option>Timber</option>
-                            <option>Laminate</option>
+                            @foreach(collect($products)->pluck('category')->unique()->values() as $categoryName)
+                                <option>{{ $categoryName }}</option>
+                            @endforeach
                         </select>
 
                         <select data-room-filter class="input-clean">
                             <option>All</option>
-                            <option>Bedroom</option>
-                            <option>Living Room</option>
-                            <option>Kitchen</option>
-                            <option>Bathroom</option>
-                            <option>Dining</option>
-                            <option>Hallway</option>
-                            <option>Commercial</option>
+                            @foreach(collect($products)->pluck('room')->unique()->values() as $roomName)
+                                <option>{{ $roomName }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -660,13 +391,13 @@
                     <span data-product-count>{{ count($products) }} products showing</span>
                 </div>
 
-                <a href="#quote" class="hidden text-sm font-medium text-mega-orange md:inline-flex">
+                <a href="{{ route('frontend.quote') }}" class="hidden text-sm font-medium text-mega-orange md:inline-flex">
                     Need help choosing? Book consultation →
                 </a>
             </div>
 
             <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                @foreach($products as $product)
+                @forelse($products as $product)
                     @php
                         $quoteData = [
                             'id' => $product['id'],
@@ -683,7 +414,6 @@
                         data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
                         data-variants='@json($product['variants'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
                         class="premium-card flooring-product-card group overflow-hidden">
-
                         <div class="relative h-60 overflow-hidden bg-mega-soft">
                             <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
                                 class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
@@ -783,7 +513,12 @@
                             </div>
                         </div>
                     </article>
-                @endforeach
+                @empty
+                    <div class="col-span-full rounded-[24px] border border-mega-line bg-mega-soft p-10 text-center">
+                        <h3 class="text-2xl font-semibold text-mega-black">No products found.</h3>
+                        <p class="mt-2 text-mega-muted">Add active products from the admin product page.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>
@@ -824,8 +559,7 @@
             </div>
 
             <div class="relative overflow-hidden bg-white shadow-premium radius-7">
-                <img src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=1400&q=85"
-                    alt="Shop the room" class="h-[650px] w-full object-cover">
+                <img src="/images/Timber Flooring Pic -2 .webp" alt="Shop the room" class="h-[650px] w-full object-cover">
 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent"></div>
 
@@ -909,37 +643,176 @@
         </div>
     </section>
 
-    <section id="inspiration" class="bg-[#f7f3ed] py-20">
+    <section id="reviews" class="bg-[#f7f3ed] py-20">
         <div class="site-container">
-            <div class="mx-auto mb-10 max-w-4xl text-center">
-                <p class="section-kicker">Trending styles</p>
-                <h2 class="section-title-premium">Interior content that keeps the site from feeling empty.</h2>
-                <p class="mx-auto section-lead">
-                    These editorial cards are useful for SEO, inspiration and social sharing later.
-                </p>
+            <div class="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+                <div class="max-w-3xl">
+                    <p class="section-kicker">Customer reviews</p>
+                    <h2 class="section-title-premium">Real feedback that builds trust.</h2>
+                    <p class="section-lead">
+                        Simple, premium review cards from the admin panel. Long reviews open in a clean modal.
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" data-review-prev
+                        class="grid h-12 w-12 place-items-center border border-mega-line bg-white text-mega-black hover:border-mega-orange hover:text-mega-orange radius-7">
+                        ←
+                    </button>
+                    <button type="button" data-review-next
+                        class="grid h-12 w-12 place-items-center border border-mega-line bg-white text-mega-black hover:border-mega-orange hover:text-mega-orange radius-7">
+                        →
+                    </button>
+                </div>
             </div>
 
-            <div class="grid gap-5 lg:grid-cols-3">
-                @foreach($styles as $style)
-                    <article class="overflow-hidden bg-white shadow-soft radius-7">
-                        <img src="{{ $style['image'] }}" alt="{{ $style['title'] }}" class="h-64 w-full object-cover">
+            <div data-review-slider class="flex snap-x gap-5 overflow-x-auto scroll-smooth pb-4">
+                @forelse($reviews as $review)
+                    @php
+                        $reviewText = trim($review->review_text);
+                        $shortReview = \Illuminate\Support\Str::limit($reviewText, 190);
+                        $needsMore = strlen($reviewText) > 190;
+                        $avatar = $review->imageUrl();
+                    @endphp
 
-                        <div class="p-6">
-                            <h3 class="text-2xl font-semibold uppercase tracking-[-0.03em] text-mega-black">
-                                {{ $style['title'] }}
-                            </h3>
-                            <p class="mt-3 min-h-20 text-base font-normal leading-7 text-mega-muted">{{ $style['text'] }}</p>
+                    <article
+                        class="review-card min-w-[320px] snap-start rounded-[28px] border border-mega-line bg-white p-6 shadow-soft md:min-w-[420px]">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-mega-orange text-lg font-black text-white">
+                                @if($avatar)
+                                    <img src="{{ $avatar }}" alt="{{ $review->customer_name }}" class="h-full w-full object-cover">
+                                @else
+                                    {{ strtoupper(substr($review->customer_name, 0, 1)) }}
+                                @endif
+                            </div>
 
-                            <a href="#quote"
-                                class="mt-5 inline-flex items-center gap-2 text-sm font-medium text-mega-black hover:text-mega-orange">
-                                Read article →
-                            </a>
+                            <div class="min-w-0">
+                                <h3 class="truncate text-xl font-semibold text-mega-black">
+                                    {{ $review->customer_name }}
+                                </h3>
+
+                                <p class="mt-1 text-sm text-mega-muted">
+                                    {{ $review->customer_title ?: 'Mega Carpets Customer' }}
+                                    @if($review->location)
+                                        · {{ $review->location }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 flex gap-1 text-mega-orange">
+                            @for($i = 1; $i <= 5; $i++)
+                                <span>{{ $i <= $review->rating ? '★' : '☆' }}</span>
+                            @endfor
+                        </div>
+
+                        <p class="mt-5 min-h-[120px] text-base leading-8 text-mega-muted">
+                            “{{ $shortReview }}”
+                        </p>
+
+                        <div class="mt-6 flex items-center justify-between gap-4">
+                            <span class="rounded-full bg-mega-orange/10 px-3 py-1 text-xs font-semibold text-mega-orange">
+                                {{ optional($review->productRange)->name ?: 'Flooring service' }}
+                            </span>
+
+                            @if($needsMore)
+                                <button type="button" data-review-open data-name="{{ $review->customer_name }}"
+                                    data-title="{{ $review->customer_title ?: 'Mega Carpets Customer' }}"
+                                    data-location="{{ $review->location }}" data-rating="{{ $review->rating }}"
+                                    data-review="{{ e($reviewText) }}"
+                                    class="text-sm font-semibold text-mega-orange hover:text-mega-black">
+                                    Read more
+                                </button>
+                            @endif
                         </div>
                     </article>
-                @endforeach
+                @empty
+                    <div class="w-full rounded-[28px] border border-mega-line bg-white p-10 text-center shadow-soft">
+                        <h3 class="text-2xl font-semibold text-mega-black">No reviews yet.</h3>
+                        <p class="mt-2 text-mega-muted">Add reviews from Admin → Reviews.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>
+
+    <div data-review-modal class="fixed inset-0 z-[100] hidden">
+        <div data-review-close class="absolute inset-0 bg-black/55 backdrop-blur-sm"></div>
+
+        <div
+            class="absolute left-1/2 top-1/2 w-[calc(100vw-32px)] max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-white p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-5">
+                <div>
+                    <p class="section-kicker">Full review</p>
+                    <h3 data-review-modal-name class="mt-2 text-3xl font-semibold text-mega-black"></h3>
+                    <p data-review-modal-meta class="mt-1 text-sm text-mega-muted"></p>
+                </div>
+
+                <button type="button" data-review-close
+                    class="grid h-10 w-10 place-items-center rounded-full bg-mega-soft text-xl text-mega-black hover:bg-mega-orange hover:text-white">
+                    ×
+                </button>
+            </div>
+
+            <div data-review-modal-rating class="mt-5 flex gap-1 text-mega-orange"></div>
+
+            <p data-review-modal-text class="mt-5 max-h-[55vh] overflow-y-auto text-lg leading-9 text-mega-muted"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const slider = document.querySelector('[data-review-slider]');
+            const prev = document.querySelector('[data-review-prev]');
+            const next = document.querySelector('[data-review-next]');
+
+            prev?.addEventListener('click', function () {
+                slider?.scrollBy({ left: -420, behavior: 'smooth' });
+            });
+
+            next?.addEventListener('click', function () {
+                slider?.scrollBy({ left: 420, behavior: 'smooth' });
+            });
+
+            const modal = document.querySelector('[data-review-modal]');
+            const modalName = document.querySelector('[data-review-modal-name]');
+            const modalMeta = document.querySelector('[data-review-modal-meta]');
+            const modalRating = document.querySelector('[data-review-modal-rating]');
+            const modalText = document.querySelector('[data-review-modal-text]');
+
+            document.querySelectorAll('[data-review-open]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const name = button.dataset.name || '';
+                    const title = button.dataset.title || '';
+                    const location = button.dataset.location || '';
+                    const rating = parseInt(button.dataset.rating || '5', 10);
+                    const review = button.dataset.review || '';
+
+                    modalName.textContent = name;
+                    modalMeta.textContent = [title, location].filter(Boolean).join(' · ');
+                    modalRating.innerHTML = '';
+
+                    for (let i = 1; i <= 5; i++) {
+                        const star = document.createElement('span');
+                        star.textContent = i <= rating ? '★' : '☆';
+                        modalRating.appendChild(star);
+                    }
+
+                    modalText.textContent = '“' + review + '”';
+                    modal.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+                });
+            });
+
+            document.querySelectorAll('[data-review-close]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                });
+            });
+        });
+    </script>
 
     <section id="quote" class="bg-white py-20">
         <div class="site-container grid gap-10 lg:grid-cols-[.9fr_1.1fr] lg:items-start">
@@ -963,43 +836,74 @@
                 </div>
             </div>
 
-            <form class="border border-mega-line bg-white p-6 shadow-soft sm:p-8 radius-7">
+            <form method="POST" action="{{ route('frontend.quick-quote.store') }}"
+                class="border border-mega-line bg-white p-6 shadow-soft sm:p-8 radius-7">
+                @csrf
+
                 <p class="section-kicker">Book a free consultation</p>
                 <h2 class="section-title-premium max-w-3xl">Request a measure, quote or product advice.</h2>
                 <p class="section-lead">
-                    This demo form shows the client the exact enquiry flow instead of a normal checkout button.
+                    Submit your flooring details and our team will follow up with quote support.
                 </p>
 
+                @if(session('quick_quote_success'))
+                    <div
+                        class="mt-6 rounded-[16px] border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800">
+                        {{ session('quick_quote_success') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div
+                        class="mt-6 rounded-[16px] border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700">
+                        Please check the form fields and try again.
+                    </div>
+                @endif
+
                 <div class="mt-8 grid gap-4 md:grid-cols-2">
-                    <input class="input-clean" placeholder="Full name">
-                    <input class="input-clean" placeholder="Phone number">
-                    <input class="input-clean" type="email" placeholder="Email address">
+                    <input name="full_name" value="{{ old('full_name') }}" class="input-clean" placeholder="Full name"
+                        required>
+                    <input name="phone" value="{{ old('phone') }}" class="input-clean" placeholder="Phone number" required>
+                    <input name="email" value="{{ old('email') }}" class="input-clean" type="email"
+                        placeholder="Email address" required>
 
-                    <select class="input-clean">
-                        <option>Carpet</option>
-                        <option>Vinyl</option>
-                        <option>Timber</option>
-                        <option>Laminate</option>
-                        <option>Commercial Flooring</option>
+                    <select name="product_category" class="input-clean" required>
+                        <option value="Carpet" @selected(old('product_category') === 'Carpet')>Carpet</option>
+                        <option value="Vinyl" @selected(old('product_category') === 'Vinyl')>Vinyl</option>
+                        <option value="Timber" @selected(old('product_category') === 'Timber')>Timber</option>
+                        <option value="Laminate" @selected(old('product_category') === 'Laminate')>Laminate</option>
+                        <option value="Hybrid Flooring" @selected(old('product_category') === 'Hybrid Flooring')>Hybrid
+                            Flooring</option>
+                        <option value="Rugs" @selected(old('product_category') === 'Rugs')>Rugs</option>
+                        <option value="Commercial Flooring" @selected(old('product_category') === 'Commercial Flooring')>
+                            Commercial Flooring</option>
                     </select>
 
-                    <select class="input-clean">
-                        <option>Bedroom</option>
-                        <option>Living Room</option>
-                        <option>Kitchen</option>
-                        <option>Bathroom</option>
-                        <option>Commercial Space</option>
+                    <select name="room" class="input-clean" required>
+                        <option value="Bedroom" @selected(old('room') === 'Bedroom')>Bedroom</option>
+                        <option value="Living Room" @selected(old('room') === 'Living Room')>Living Room</option>
+                        <option value="Kitchen" @selected(old('room') === 'Kitchen')>Kitchen</option>
+                        <option value="Bathroom" @selected(old('room') === 'Bathroom')>Bathroom</option>
+                        <option value="Hallway" @selected(old('room') === 'Hallway')>Hallway</option>
+                        <option value="Commercial Space" @selected(old('room') === 'Commercial Space')>Commercial Space
+                        </option>
                     </select>
 
-                    <input class="input-clean" placeholder="Approx room size, e.g. 4m x 5m">
+                    <input name="approximate_size" value="{{ old('approximate_size') }}" class="input-clean"
+                        placeholder="Approx room size, e.g. 4m x 5m">
 
-                    <textarea class="input-clean md:col-span-2" rows="5"
-                        placeholder="Tell us about the project, preferred colour, budget, address area or installation timeline..."></textarea>
+                    <textarea name="message" class="input-clean md:col-span-2" rows="5"
+                        placeholder="Tell us about the project, preferred colour, budget, address area or installation timeline...">{{ old('message') }}</textarea>
                 </div>
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-sm font-normal text-mega-muted">Demo only. No real submission is connected yet.</p>
-                    <button type="button" class="btn-primary">Send quote request <span>→</span></button>
+                    <p class="text-sm font-normal text-mega-muted">
+                        Your request will be saved in the admin quote requests panel.
+                    </p>
+
+                    <button type="submit" class="btn-primary">
+                        Send quote request <span>→</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -1009,26 +913,31 @@
         <div class="site-container grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
             <div>
                 <p class="section-kicker">FAQ</p>
-                <h2 class="section-title-premium">Clear answers for the demo presentation.</h2>
+                <h2 class="section-title-premium">Clear answers for customers.</h2>
                 <p class="section-lead">
-                    Use these points to explain why the website is quote-based rather than checkout-based.
+                    Manage these questions from the admin panel.
                 </p>
             </div>
 
             <div class="space-y-3">
-                @foreach($faqs as $faq)
+                @forelse($faqs as $faq)
                     <details class="bg-white shadow-sm radius-7" {{ $loop->first ? 'open' : '' }}>
                         <summary
                             class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left text-lg font-medium text-mega-black">
-                            {{ $faq['question'] }}
+                            {{ $faq->question }}
                             <span class="text-2xl text-mega-orange">+</span>
                         </summary>
 
                         <p class="px-5 pb-5 text-base font-normal leading-7 text-mega-muted">
-                            {{ $faq['answer'] }}
+                            {{ $faq->answer }}
                         </p>
                     </details>
-                @endforeach
+                @empty
+                    <div class="rounded-[24px] border border-mega-line bg-white p-8 shadow-sm">
+                        <h3 class="text-2xl font-semibold text-mega-black">No FAQs added yet.</h3>
+                        <p class="mt-2 text-mega-muted">Add FAQs from Admin → FAQs.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>

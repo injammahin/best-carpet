@@ -1,52 +1,67 @@
 @php
+    use App\Models\QuoteRequest;
+
+    $unreadQuoteCount = class_exists(QuoteRequest::class)
+        ? QuoteRequest::whereNull('read_at')->count()
+        : 0;
+
     $navItems = [
         [
             'label' => 'Dashboard',
             'url' => route('admin.dashboard'),
             'active' => request()->routeIs('admin.dashboard'),
             'icon' => 'dashboard',
+            'badge' => null,
         ],
         [
             'label' => 'Products',
-            'url' => '#',
-            'active' => false,
+            'url' => route('admin.products.index'),
+            'active' => request()->routeIs('admin.products.*'),
             'icon' => 'box',
+            'badge' => null,
         ],
         [
             'label' => 'Categories',
-            'url' => '#',
-            'active' => false,
+            'url' => route('admin.product-categories.index'),
+            'active' => request()->routeIs('admin.product-categories.*'),
             'icon' => 'grid',
+            'badge' => null,
+        ],
+        [
+            'label' => 'Area Sizes',
+            'url' => route('admin.product-sizes.index'),
+            'active' => request()->routeIs('admin.product-sizes.*'),
+            'icon' => 'quote',
+            'badge' => null,
         ],
         [
             'label' => 'Quote Requests',
-            'url' => '#',
-            'active' => false,
+            'url' => route('admin.quote-requests.index'),
+            'active' => request()->routeIs('admin.quote-requests.*'),
             'icon' => 'quote',
+            'badge' => $unreadQuoteCount,
         ],
-        [
-            'label' => 'Mobile Showroom',
-            'url' => '#',
-            'active' => false,
-            'icon' => 'van',
-        ],
-        [
-            'label' => 'Inspiration',
-            'url' => '#',
-            'active' => false,
-            'icon' => 'article',
-        ],
+
         [
             'label' => 'Reviews',
-            'url' => '#',
-            'active' => false,
+            'url' => route('admin.reviews.index'),
+            'active' => request()->routeIs('admin.reviews.*'),
             'icon' => 'star',
+            'badge' => null,
+        ],
+        [
+            'label' => 'FAQs',
+            'url' => route('admin.faqs.index'),
+            'active' => request()->routeIs('admin.faqs.*'),
+            'icon' => 'article',
+            'badge' => null,
         ],
         [
             'label' => 'Settings',
-            'url' => '#',
-            'active' => false,
+            'url' => route('admin.settings.edit'),
+            'active' => request()->routeIs('admin.settings.*'),
             'icon' => 'settings',
+            'badge' => null,
         ],
     ];
 @endphp
@@ -55,35 +70,25 @@
     class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full overflow-hidden bg-mega-black text-white shadow-[24px_0_80px_rgba(0,0,0,0.22)] transition-all duration-300 lg:translate-x-0"
     :class="[
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        sidebarCollapsed ? 'lg:w-[92px]' : 'lg:w-72'
-    ]"
->
-    <div class="absolute inset-0 pointer-events-none">
+        sidebarCollapsed ? 'lg:!w-[92px]' : 'lg:!w-72'
+    ]">
+    <div class="pointer-events-none absolute inset-0">
         <div class="absolute -top-28 left-10 h-56 w-56 rounded-full bg-mega-orange/20 blur-3xl"></div>
         <div class="absolute bottom-20 right-0 h-44 w-44 rounded-full bg-white/5 blur-3xl"></div>
-        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,90,10,0.08),transparent_28%,rgba(255,255,255,0.03))]"></div>
+        <div
+            class="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,90,10,0.08),transparent_28%,rgba(255,255,255,0.03))]">
+        </div>
     </div>
 
     <div class="relative flex h-full flex-col">
-        {{-- Logo area --}}
         <div class="flex h-24 items-center justify-between border-b border-white/10 px-5">
             <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 items-center gap-3">
                 <div class="flex h-12 w-[92px] shrink-0 items-center justify-center bg-white radius-7">
-                    <div class="text-center leading-none">
-                        <div class="-skew-x-12 font-heading text-lg font-medium text-mega-orange">
-                            MEGA
-                        </div>
-                        <div class="text-[9px] font-medium uppercase tracking-[0.22em] text-mega-black">
-                            Carpets
-                        </div>
-                    </div>
+                    <img src="/images/logo/mega_logo_3-removebg-preview.webp" alt="Mega Carpets Logo"
+                        class="max-h-10 w-auto object-contain">
                 </div>
 
-                <div
-                    x-show="!sidebarCollapsed || !isDesktop"
-                    x-transition.opacity
-                    class="min-w-0"
-                >
+                <div x-show="!sidebarCollapsed || !isDesktop" x-transition.opacity class="min-w-0">
                     <p class="truncate text-sm font-medium text-white">
                         Admin Panel
                     </p>
@@ -93,27 +98,21 @@
                 </div>
             </a>
 
-            <button
-                type="button"
+            <button type="button"
                 class="flex h-10 w-10 shrink-0 items-center justify-center border border-white/10 bg-white/5 text-white/80 transition hover:border-mega-orange hover:text-mega-orange radius-7 lg:hidden"
-                @click="sidebarOpen = false"
-                aria-label="Close sidebar"
-            >
+                @click="sidebarOpen = false" aria-label="Close sidebar">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
                 </svg>
             </button>
         </div>
 
-        {{-- Desktop collapse button --}}
         <div class="hidden px-5 pt-5 lg:block">
-            <button
-                type="button"
+            <button type="button"
                 class="flex w-full items-center gap-3 border border-white/10 bg-white/5 px-3 py-3 text-sm font-medium text-white/70 transition hover:border-mega-orange hover:bg-mega-orange/10 hover:text-white radius-7"
-                :class="sidebarCollapsed ? 'justify-center' : 'justify-start'"
-                @click="toggleSidebar()"
-            >
-                <svg class="h-5 w-5 shrink-0 transition" :class="sidebarCollapsed ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                :class="sidebarCollapsed ? 'justify-center' : 'justify-start'" @click="toggleSidebar()">
+                <svg class="h-5 w-5 shrink-0 transition" :class="sidebarCollapsed ? 'rotate-180' : ''"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
 
@@ -123,16 +122,12 @@
             </button>
         </div>
 
-        {{-- Navigation --}}
         <nav class="flex-1 space-y-1 overflow-y-auto px-4 py-5">
             @foreach($navItems as $item)
-                <a
-                    href="{{ $item['url'] }}"
-                    @click="closeMobileSidebar()"
+                <a href="{{ $item['url'] }}" @click="closeMobileSidebar()"
                     class="group relative flex items-center gap-3 px-4 py-3 text-sm font-medium transition radius-7
-                        {{ $item['active'] ? 'bg-mega-orange text-white shadow-[0_16px_34px_rgba(255,90,10,0.24)]' : 'text-white/62 hover:bg-white/8 hover:text-white' }}"
-                    :class="sidebarCollapsed && isDesktop ? 'justify-center px-3' : 'justify-start'"
-                >
+                                        {{ $item['active'] ? 'bg-mega-orange text-white shadow-[0_16px_34px_rgba(255,90,10,0.24)]' : 'text-white/62 hover:bg-white/[0.08] hover:text-white' }}"
+                    :class="sidebarCollapsed && isDesktop ? 'justify-center px-3' : 'justify-start'">
                     <span class="flex h-5 w-5 shrink-0 items-center justify-center">
                         @if($item['icon'] === 'dashboard')
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -172,46 +167,40 @@
                         @else
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                 <circle cx="12" cy="12" r="3" />
-                                <path d="M19.4 15a7.8 7.8 0 0 0 .1-6l2-1.5-2-3.5-2.4 1a8 8 0 0 0-5.2-3L11.5 0h-4l-.4 2.9a8 8 0 0 0-5.2 3l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 .1 6l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 5.2 3l.4 2.9h4l.4-2.9a8 8 0 0 0 5.2-3l2.4 1 2-3.5-2.2-1.9z" class="hidden" />
-                                <path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1a7 7 0 0 0-1.8-1L14.4 3h-4.8l-.3 3.1a7 7 0 0 0-1.8 1l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12a7 7 0 0 0 .1 1l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.8 1l.3 3.1h4.8l.3-3.1a7 7 0 0 0 1.8-1l2.4 1 2-3.4-2-1.5A7 7 0 0 0 19 12z" />
+                                <path
+                                    d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1a7 7 0 0 0-1.8-1L14.4 3h-4.8l-.3 3.1a7 7 0 0 0-1.8 1l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12a7 7 0 0 0 .1 1l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.8 1l.3 3.1h4.8l.3-3.1a7 7 0 0 0 1.8-1l2.4 1 2-3.4-2-1.5A7 7 0 0 0 19 12z" />
                             </svg>
                         @endif
                     </span>
 
-                    <span
-                        x-show="!sidebarCollapsed || !isDesktop"
-                        x-transition.opacity
-                        class="truncate"
-                    >
+                    <span x-show="!sidebarCollapsed || !isDesktop" x-transition.opacity class="truncate">
                         {{ $item['label'] }}
                     </span>
 
+                    @if(!empty($item['badge']) && $item['badge'] > 0)
+                        <span x-show="!sidebarCollapsed || !isDesktop"
+                            class="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-mega-orange">
+                            {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
+                        </span>
+                    @endif
+
                     @if($item['active'])
-                        <span
-                            x-show="!sidebarCollapsed || !isDesktop"
-                            class="ml-auto h-2 w-2 rounded-full bg-white"
-                        ></span>
+                        <span x-show="!sidebarCollapsed || !isDesktop" class="ml-1 h-2 w-2 rounded-full bg-white"></span>
                     @endif
                 </a>
             @endforeach
         </nav>
 
-        {{-- Admin profile card --}}
         <div class="border-t border-white/10 p-4">
-            <div
-                class="border border-white/10 bg-white/5 p-4 radius-7"
-                :class="sidebarCollapsed && isDesktop ? 'px-3' : ''"
-            >
+            <div class="border border-white/10 bg-white/5 p-4 radius-7"
+                :class="sidebarCollapsed && isDesktop ? 'px-3' : ''">
                 <div class="flex items-center gap-3" :class="sidebarCollapsed && isDesktop ? 'justify-center' : ''">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center bg-mega-orange text-sm font-medium text-white radius-7">
+                    <div
+                        class="flex h-11 w-11 shrink-0 items-center justify-center bg-mega-orange text-sm font-medium text-white radius-7">
                         {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                     </div>
 
-                    <div
-                        x-show="!sidebarCollapsed || !isDesktop"
-                        x-transition.opacity
-                        class="min-w-0"
-                    >
+                    <div x-show="!sidebarCollapsed || !isDesktop" x-transition.opacity class="min-w-0">
                         <p class="truncate text-sm font-medium text-white">
                             {{ Auth::user()->name ?? 'Admin User' }}
                         </p>
@@ -221,19 +210,12 @@
                     </div>
                 </div>
 
-                <form
-                    action="{{ route('admin.logout') }}"
-                    method="POST"
-                    class="mt-4"
-                    x-show="!sidebarCollapsed || !isDesktop"
-                    x-transition.opacity
-                >
+                <form action="{{ route('admin.logout') }}" method="POST" class="mt-4"
+                    x-show="!sidebarCollapsed || !isDesktop" x-transition.opacity>
                     @csrf
 
-                    <button
-                        type="submit"
-                        class="flex w-full items-center justify-center gap-2 border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/70 transition hover:border-mega-orange hover:bg-mega-orange hover:text-white radius-7"
-                    >
+                    <button type="submit"
+                        class="flex w-full items-center justify-center gap-2 border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/70 transition hover:border-mega-orange hover:bg-mega-orange hover:text-white radius-7">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                             <path d="M10 17l5-5-5-5" />
                             <path d="M15 12H3" />
@@ -247,10 +229,5 @@
     </div>
 </aside>
 
-<div
-    x-show="sidebarOpen"
-    x-transition.opacity
-    x-cloak
-    class="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm lg:hidden"
-    @click="sidebarOpen = false"
-></div>
+<div x-show="sidebarOpen" x-transition.opacity x-cloak class="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm lg:hidden"
+    @click="sidebarOpen = false"></div>
