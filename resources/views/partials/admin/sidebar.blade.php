@@ -14,6 +14,14 @@
             'badge' => null,
         ],
         [
+            'label' => 'Home Settings',
+            'url' => route('admin.home-settings.edit'),
+            'active' => request()->routeIs('admin.home-settings.*'),
+            'icon' => 'settings',
+            'badge' => null,
+        ],
+
+        [
             'label' => 'Products',
             'url' => route('admin.products.index'),
             'active' => request()->routeIs('admin.products.*'),
@@ -126,7 +134,7 @@
             @foreach($navItems as $item)
                 <a href="{{ $item['url'] }}" @click="closeMobileSidebar()"
                     class="group relative flex items-center gap-3 px-4 py-3 text-sm font-medium transition radius-7
-                                        {{ $item['active'] ? 'bg-mega-orange text-white shadow-[0_16px_34px_rgba(255,90,10,0.24)]' : 'text-white/62 hover:bg-white/[0.08] hover:text-white' }}"
+                                                        {{ $item['active'] ? 'bg-mega-orange text-white shadow-[0_16px_34px_rgba(255,90,10,0.24)]' : 'text-white/62 hover:bg-white/[0.08] hover:text-white' }}"
                     :class="sidebarCollapsed && isDesktop ? 'justify-center px-3' : 'justify-start'">
                     <span class="flex h-5 w-5 shrink-0 items-center justify-center">
                         @if($item['icon'] === 'dashboard')

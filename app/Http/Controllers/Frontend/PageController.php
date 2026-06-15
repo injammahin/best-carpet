@@ -10,6 +10,7 @@ use App\Models\ProductRange;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
+use App\Models\HomePageSetting;
 class PageController extends Controller
 {
 public function home(): View
@@ -22,6 +23,8 @@ public function home(): View
         'vinyl',
         'rugs',
     ];
+    $homeSetting = HomePageSetting::query()->firstOrCreate([], HomePageSetting::defaultData());
+
 
     $categoryModels = ProductCategory::active()
         ->whereNull('parent_id')
@@ -88,6 +91,7 @@ public function home(): View
         ->get();
 
     return view('frontend.home', [
+        'homeSetting' => $homeSetting,
         'categories' => $categories,
         'products' => $products,
         'homeFilterCategories' => $homeFilterCategories,

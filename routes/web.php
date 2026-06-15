@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\QuoteRequestController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Admin\HomePageSettingController;
 /*
 |--------------------------------------------------------------------------
 | Frontend Routes
@@ -154,4 +154,10 @@ Route::prefix('admin')
 
         Route::put('/settings', [SiteSettingController::class, 'update'])
             ->name('settings.update');
+            
+        Route::get('/home-page-settings', [HomePageSettingController::class, 'edit'])
+            ->name('home-settings.edit');
+
+        Route::put('/home-page-settings', [HomePageSettingController::class, 'update'])
+            ->name('home-settings.update');
     });

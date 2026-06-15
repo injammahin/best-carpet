@@ -6,48 +6,7 @@
 @section('content')
 
     @php
-        $heroSlides = [
-            [
-                'eyebrow' => 'Premium flooring showroom',
-                'title' => 'Choose a floor. Book a consultation. Get a clear quote.',
-                'text' => 'Browse carpet, vinyl, timber and laminate ranges, save your favourites, then request a free measure and quote.',
-                'image' => '/images/Carpet Pic.webp',
-            ],
-            [
-                'eyebrow' => 'Quote-first product journey',
-                'title' => 'A showroom experience with stronger visual impact.',
-                'text' => 'Clean product cards, premium category blocks, room inspiration and quote-ready product selection.',
-                'image' => '/images/Timber Flooring Pic -2 .webp',
-            ],
-            [
-                'eyebrow' => 'Built for flooring enquiries',
-                'title' => 'Browse ranges, compare options and save products.',
-                'text' => 'Customers select colour, type and price indication before adding products to their quote list.',
-                'image' => '/images/Background Pic 2.webp',
-            ],
-        ];
-
-        /*
-        |--------------------------------------------------------------------------
-        | Dynamic data from PageController
-        |--------------------------------------------------------------------------
-        | Do not create static $categories, $products, $reviews or $faqs here.
-        | These variables are coming from PageController@home.
-        |--------------------------------------------------------------------------
-        */
-
-        $categories = $categories ?? [];
-        $products = $products ?? [];
-        $reviews = $reviews ?? collect();
-        $faqs = $faqs ?? collect();
-
-        $brandVan = asset('images/Mega small van wrap idea.png');
-
-        $mascotImage = file_exists(public_path('images/mega-mascot.png'))
-            ? asset('images/mega-mascot.png')
-            : asset('images/mega man logo.png');
-
-        $services = [
+        $services = $services ?? [
             [
                 'title' => 'Free Measure & Quote',
                 'text' => 'Customers submit room details and the team follows up with accurate quote support.',
@@ -65,178 +24,169 @@
                 'text' => 'Business-ready carpet, vinyl and laminate options for offices, shops and rentals.',
             ],
         ];
+        $homeSetting = $homeSetting ?? \App\Models\HomePageSetting::query()->firstOrCreate([], \App\Models\HomePageSetting::defaultData());
 
-        $projects = [
-            [
-                'title' => 'Family lounge refresh',
-                'type' => 'Soft carpet installation',
-                'location' => 'Residential home',
-                'image' => 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80',
-            ],
-            [
-                'title' => 'Modern apartment upgrade',
-                'type' => 'Hybrid vinyl planks',
-                'location' => 'Apartment living',
-                'image' => 'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1000&q=80',
-            ],
-            [
-                'title' => 'Retail showroom finish',
-                'type' => 'Laminate and entrance carpet',
-                'location' => 'Commercial fitout',
-                'image' => 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1000&q=80',
-            ],
-        ];
+        $heroSlides = $homeSetting->heroSlidesForView();
 
-        $roomItems = [
-            [
-                'type' => 'Curtains/Sheers',
-                'name' => 'Bali Driftwood',
-                'color' => '#dcd8cd',
-            ],
-            [
-                'type' => 'Rugs',
-                'name' => 'Retreat Weave',
-                'color' => '#bcae96',
-            ],
-            [
-                'type' => 'Timber',
-                'name' => 'Parky Summit',
-                'color' => '#c9a77b',
-            ],
-            [
-                'type' => 'Carpet',
-                'name' => 'Aston Soft Pile',
-                'color' => '#9e9284',
-            ],
-        ];
+        $heroSideImageOne = $homeSetting->imageUrl(
+            $homeSetting->hero_side_image_one,
+            '/images/Mega small van wrap idea.png'
+        );
+
+        $heroSideImageTwo = $homeSetting->imageUrl(
+            $homeSetting->hero_side_image_two,
+            '/images/mega man logo.png'
+        );
+
+        $heroCardKicker = $homeSetting->hero_card_kicker ?: 'Premium demo ready';
+        $heroCardText = $homeSetting->hero_card_text ?: 'A quote-first showroom experience for serious flooring buyers.';
+
+        $visualizerImage = $homeSetting->imageUrl(
+            $homeSetting->visualizer_image,
+            'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=1500&q=85'
+        );
+
+        $visualizerKicker = $homeSetting->visualizer_kicker ?: 'Room visualiser concept';
+        $visualizerTitle = $homeSetting->visualizer_title ?: 'Let customers imagine the floor before they book.';
+        $visualizerText = $homeSetting->visualizer_text ?: 'Customers can compare colour direction, save favourites and move toward quote request.';
+        $visualizerFeatures = $homeSetting->visualizerFeaturesForView();
+
+        $shopRoomImage = $homeSetting->imageUrl(
+            $homeSetting->shop_room_image,
+            '/images/Timber Flooring Pic -2 .webp'
+        );
+
+        $shopRoomKicker = $homeSetting->shop_room_kicker ?: 'Shop the room';
+        $shopRoomTitle = $homeSetting->shop_room_title ?: 'A premium inspiration block like a real showroom catalogue.';
+        $shopRoomText = $homeSetting->shop_room_text ?: 'Connect product discovery with full-room ideas so the website feels more useful and premium.';
+        $roomItems = $homeSetting->shopRoomItemsForView();
+
+        $projects = $homeSetting->recentWorkForView();
+
+        $quoteImage = $homeSetting->imageUrl(
+            $homeSetting->quote_image,
+            '/images/Mega small van wrap idea.png'
+        );
+
+        $quoteKicker = $homeSetting->quote_kicker ?: 'Book a free consultation';
+        $quoteTitle = $homeSetting->quote_title ?: 'Request a measure, quote or product advice.';
+        $quoteText = $homeSetting->quote_text ?: 'Submit your flooring details and our team will follow up with quote support.';
+        $quotePhone = $homeSetting->quote_phone ?: '1300 131 196';
+
+        $categories = $categories ?? [];
+        $products = $products ?? [];
+        $reviews = $reviews ?? collect();
+        $faqs = $faqs ?? collect();
+
+        $brandVan = $quoteImage;
     @endphp
 
-    <section id="top" class="relative overflow-hidden bg-mega-black px-3 pb-4 sm:px-5">
-        <div class="relative mx-auto max-w-[1500px] overflow-hidden bg-mega-black shadow-premium radius-7">
-            <div class="absolute inset-0">
+    <section id="top" data-hero-slider class="premium-hero">
+        <div class="premium-hero-bg-layer">
+            @foreach($heroSlides as $index => $slide)
+                <img src="{{ $slide['image'] }}" alt="{{ $slide['title'] }}"
+                    class="premium-hero-bg {{ $index === 0 ? 'is-active' : '' }}" data-hero-image="{{ $index }}">
+            @endforeach
+
+            <div class="premium-hero-overlay"></div>
+            <div class="premium-hero-warm-glow"></div>
+        </div>
+
+        <div class="premium-hero-content">
+            <div class="premium-hero-copy">
                 @foreach($heroSlides as $index => $slide)
-                    <img src="{{ $slide['image'] }}" alt="{{ $slide['title'] }}"
-                        class="hero-slide absolute inset-0 h-full w-full object-cover {{ $index === 0 ? 'is-active' : '' }}">
+                    <div class="premium-hero-text {{ $index === 0 ? 'is-active' : '' }}" data-slide-content="{{ $index }}">
+                        <div class="premium-hero-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 2l2.1 6.4H21l-5.5 4 2.1 6.6-5.6-4.1L6.4 19l2.1-6.6L3 8.4h6.9L12 2z" />
+                            </svg>
+
+                            {{ $slide['eyebrow'] }}
+                        </div>
+
+                        <h1>
+                            {{ $slide['title'] }}
+                        </h1>
+
+                        <p>
+                            {{ $slide['text'] }}
+                        </p>
+                    </div>
                 @endforeach
 
-                <div class="absolute inset-0 bg-gradient-to-r from-black via-black/72 to-black/18"></div>
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,90,0,.26),transparent_32%)]">
-                </div>
-            </div>
+                <div class="premium-hero-actions">
+                    <a href="#quote" class="btn-primary">
+                        Book a free consultation
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                            <path d="M5 12h14" />
+                            <path d="M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
 
-            <div
-                class="relative grid min-h-[680px] items-center gap-10 px-5 py-16 sm:px-10 lg:grid-cols-[1.02fr_.98fr] lg:px-16">
-                <div class="max-w-3xl">
-                    @foreach($heroSlides as $index => $slide)
-                        <div class="hero-slide-content {{ $index === 0 ? '' : 'hidden' }}" data-slide-content="{{ $index }}">
-                            <div
-                                class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-white/85 backdrop-blur">
-                                <svg class="h-4 w-4 text-mega-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5">
-                                    <path d="M12 2l2.1 6.4H21l-5.5 4 2.1 6.6-5.6-4.1L6.4 19l2.1-6.6L3 8.4h6.9L12 2z" />
-                                </svg>
-                                {{ $slide['eyebrow'] }}
-                            </div>
-
-                            <h1
-                                class="max-w-4xl text-[36px] font-semibold leading-[1.02] tracking-[-0.055em] text-white sm:text-5xl lg:text-6xl">
-                                {{ $slide['title'] }}
-                            </h1>
-
-                            <p class="mt-6 max-w-2xl text-lg font-normal leading-8 text-white">
-                                {{ $slide['text'] }}
-                            </p>
-                        </div>
-                    @endforeach
-
-                    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <a href="#quote" class="btn-primary">
-                            Book a free consultation
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                <path d="M5 12h14" />
-                                <path d="M13 6l6 6-6 6" />
-                            </svg>
-                        </a>
-
-                        <a href="#products"
-                            class="inline-flex items-center justify-center gap-2 border border-white/20 bg-white/10 px-6 py-4 text-sm font-medium text-white backdrop-blur transition hover:bg-white hover:text-mega-black radius-7">
-                            Explore flooring ranges
-                        </a>
-                    </div>
-
-                    <div class="mt-9 grid max-w-2xl grid-cols-3 gap-3">
-                        <div class="border border-white/10 bg-white/10 p-4 backdrop-blur radius-7">
-                            <strong class="block text-3xl font-semibold text-white">4</strong>
-                            <span class="mt-1 block text-xs font-medium uppercase tracking-[0.14em] text-white/55">Core
-                                flooring categories</span>
-                        </div>
-
-                        <div class="border border-white/10 bg-white/10 p-4 backdrop-blur radius-7">
-                            <strong class="block text-3xl font-semibold text-white">24h</strong>
-                            <span class="mt-1 block text-xs font-medium uppercase tracking-[0.14em] text-white/55">Quote
-                                follow-up</span>
-                        </div>
-
-                        <div class="border border-white/10 bg-white/10 p-4 backdrop-blur radius-7">
-                            <strong class="block text-3xl font-semibold text-white">0</strong>
-                            <span class="mt-1 block text-xs font-medium uppercase tracking-[0.14em] text-white/55">Checkout
-                                confusion</span>
-                        </div>
-                    </div>
+                    <a href="#products" class="premium-hero-secondary-btn">
+                        Explore flooring ranges
+                    </a>
                 </div>
 
-                <div class="relative hidden min-h-[520px] lg:block">
-                    <div
-                        class="absolute right-0 top-4 w-[86%] rounded-[7px] border border-white/10 bg-white/10 p-3 shadow-[0_30px_80px_rgba(0,0,0,.35)] backdrop-blur-md">
-                        <img src="/images/Mega small van wrap idea.png" alt="Mega Carpets van"
-                            class="h-[300px] w-full rounded-[7px] object-cover object-center">
-                        <div class="mt-3 grid grid-cols-3 gap-2 text-center">
-                            <div
-                                class="rounded-[7px] bg-white px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-brand-black">
-                                Mega range</div>
-                            <div
-                                class="rounded-[7px] bg-white px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-brand-black">
-                                Mega service</div>
-                            <div
-                                class="rounded-[7px] bg-white px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-brand-black">
-                                Mega value</div>
-                        </div>
-                    </div><img src="/images/mega man logo.png" alt="Mega Carpets mascot"
-                        class="absolute -bottom-4 -left-6 h-[370px] w-auto drop-shadow-[0_30px_35px_rgba(0,0,0,.45)]">
-                    <div
-                        class="absolute bottom-10 right-4 max-w-xs rounded-[7px] border border-white/10 bg-white p-5 shadow-[0_24px_60px_rgba(0,0,0,.24)]">
-                        <p class="text-xs font-black uppercase tracking-[0.18em] section-kicker">Premium demo ready</p>
-                        <p class="mt-2 text-lg font-black leading-tight text-zinc-950">A quote-first showroom experience for
-                            serious flooring buyers.</p>
+                <div class="premium-hero-stats">
+                    <div>
+                        <strong>4</strong>
+                        <span>Core flooring categories</span>
+                    </div>
+
+                    <div>
+                        <strong>24h</strong>
+                        <span>Quote follow-up</span>
+                    </div>
+
+                    <div>
+                        <strong>0</strong>
+                        <span>Checkout confusion</span>
                     </div>
                 </div>
             </div>
 
-            <div class="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-3">
-                <button type="button" data-hero-prev
-                    class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white hover:text-mega-black"
-                    aria-label="Previous slide">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                        <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                </button>
+            <div class="premium-hero-visual">
+                <div class="premium-hero-van-card">
+                    <img src="{{ $heroSideImageOne }}" alt="Mega Carpets mobile showroom">
 
-                <div class="flex items-center gap-2">
-                    @foreach($heroSlides as $index => $slide)
-                        <button type="button"
-                            class="hero-dot h-2.5 w-2.5 rounded-full bg-white/35 transition-all {{ $index === 0 ? 'is-active' : '' }}"
-                            aria-label="Go to slide"></button>
-                    @endforeach
+                    <div class="premium-hero-tabs">
+                        <span>Mega Range</span>
+                        <span>Mega Service</span>
+                        <span>Mega Value</span>
+                    </div>
                 </div>
 
-                <button type="button" data-hero-next
-                    class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white hover:text-mega-black"
-                    aria-label="Next slide">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                        <path d="M9 18l6-6-6-6" />
-                    </svg>
-                </button>
+                <div class="premium-hero-mascot-card">
+                    <img src="{{ $heroSideImageTwo }}" alt="Mega Carpets flooring specialist">
+                </div>
+
+                <div class="premium-hero-message-card">
+                    <p>{{ $heroCardKicker }}</p>
+                    <h3>{{ $heroCardText }}</h3>
+                </div>
             </div>
+        </div>
+
+        <div class="premium-hero-controls">
+            <button type="button" data-hero-prev aria-label="Previous slide">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+            </button>
+
+            <div>
+                @foreach($heroSlides as $index => $slide)
+                    <button type="button" class="premium-hero-dot {{ $index === 0 ? 'is-active' : '' }}"
+                        data-hero-dot="{{ $index }}" aria-label="Go to slide {{ $index + 1 }}"></button>
+                @endforeach
+            </div>
+
+            <button type="button" data-hero-next aria-label="Next slide">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </button>
         </div>
     </section>
 
@@ -291,14 +241,14 @@
     <section id="visualizer" class="bg-[#f7f3ed] py-20">
         <div class="site-container grid items-center gap-10 lg:grid-cols-[.85fr_1.15fr]">
             <div>
-                <p class="section-kicker">Room visualiser concept</p>
-                <h2 class="section-title-premium max-w-xl">Let customers imagine the floor before they book.</h2>
+                <p class="section-kicker">{{ $visualizerKicker }}</p>
+                <h2 class="section-title-premium max-w-xl">{{ $visualizerTitle }}</h2>
                 <p class="section-lead">
-                    Customers can compare colour direction, save favourites and move toward quote request.
+                    {{ $visualizerText }}
                 </p>
 
                 <div class="mt-8 grid gap-3 sm:grid-cols-2">
-                    @foreach(['Upload room idea', 'Compare colours', 'Save favourites', 'Request a quote'] as $item)
+                    @foreach($visualizerFeatures as $item)
                         <div class="flex items-center gap-3 bg-white p-4 shadow-sm radius-7">
                             <span class="text-mega-orange">✓</span>
                             <span class="font-medium text-mega-black">{{ $item }}</span>
@@ -312,8 +262,7 @@
             </div>
 
             <div class="relative overflow-hidden bg-white p-3 shadow-premium radius-7">
-                <img src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=1500&q=85"
-                    alt="Room visualiser" class="h-[520px] w-full object-cover radius-7">
+                <img src="{{ $visualizerImage }}" alt="Room visualiser" class="h-[520px] w-full object-cover radius-7">
 
                 <button
                     class="absolute right-[18%] top-[16%] grid h-12 w-12 place-items-center rounded-full border-[10px] border-white bg-mega-orange shadow-soft"
@@ -656,10 +605,10 @@
     <section id="shop-room" class="bg-[#f7f3ed] py-20">
         <div class="site-container grid gap-10 lg:grid-cols-[.95fr_1.05fr] lg:items-center">
             <div>
-                <p class="section-kicker">Shop the room</p>
-                <h2 class="section-title-premium max-w-2xl">A premium inspiration block like a real showroom catalogue.</h2>
+                <p class="section-kicker">{{ $shopRoomKicker }}</p>
+                <h2 class="section-title-premium max-w-2xl">{{ $shopRoomTitle }}</h2>
                 <p class="section-lead">
-                    Connect product discovery with full-room ideas so the website feels more useful and premium.
+                    {{ $shopRoomText }}
                 </p>
 
                 <div class="mt-8 space-y-3">
@@ -689,7 +638,7 @@
             </div>
 
             <div class="relative overflow-hidden bg-white shadow-premium radius-7">
-                <img src="/images/Timber Flooring Pic -2 .webp" alt="Shop the room" class="h-[650px] w-full object-cover">
+                <img src="{{ $shopRoomImage }}" alt="Shop the room" class="h-[650px] w-full object-cover">
 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent"></div>
 
@@ -948,7 +897,7 @@
         <div class="site-container grid gap-10 lg:grid-cols-[.9fr_1.1fr] lg:items-start">
             <div class="hidden lg:block">
                 <div class="overflow-hidden bg-mega-black text-white shadow-premium radius-7">
-                    <img src="{{ $brandVan }}"
+                    <img src="{{ $quoteImage }}"
                         onerror="this.src='https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85'"
                         alt="Mega Carpets van" class="h-[420px] w-full object-cover">
 
@@ -957,7 +906,7 @@
                             class="inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-white">
                             Call us today
                         </span>
-                        <h2 class="mt-4 text-4xl font-semibold tracking-[-0.05em]">1300 131 196</h2>
+                        <h2 class="mt-4 text-4xl font-semibold tracking-[-0.05em]">{{ $quotePhone }}</h2>
                         <p class="mt-3 text-white/65">
                             Use this form to collect qualified quote requests. Later it can connect with email, CRM, Laravel
                             admin or SMS notification.
@@ -970,10 +919,10 @@
                 class="border border-mega-line bg-white p-6 shadow-soft sm:p-8 radius-7">
                 @csrf
 
-                <p class="section-kicker">Book a free consultation</p>
-                <h2 class="section-title-premium max-w-3xl">Request a measure, quote or product advice.</h2>
+                <p class="section-kicker">{{ $quoteKicker }}</p>
+                <h2 class="section-title-premium max-w-3xl">{{ $quoteTitle }}</h2>
                 <p class="section-lead">
-                    Submit your flooring details and our team will follow up with quote support.
+                    {{ $quoteText }}
                 </p>
 
                 @if(session('quick_quote_success'))
