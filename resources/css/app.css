@@ -1656,19 +1656,17 @@ body {
 .premium-hero-overlay {
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(90deg, rgba(7, 7, 7, 0.95) 0%, rgba(7, 7, 7, 0.78) 38%, rgba(7, 7, 7, 0.42) 68%, rgba(7, 7, 7, 0.18) 100%),
-        linear-gradient(0deg, rgba(7, 7, 7, 0.45) 0%, rgba(7, 7, 7, 0.08) 42%, rgba(7, 7, 7, 0.24) 100%);
+    background: linear-gradient(101deg, rgb(7 7 7 / 24%) 0%, rgb(7 7 7 / 11%) 38%, rgb(7 7 7 / 0%) 68%, rgba(7, 7, 7, 0.18) 100%), linear-gradient(0deg, rgb(7 7 7 / 7%) 0%, rgba(7, 7, 7, 0.08) 42%, rgb(7 7 7 / 4%) 100%);
 }
 
-.premium-hero-warm-glow {
+/* .premium-hero-warm-glow {
     position: absolute;
     inset: 0;
     background:
         radial-gradient(circle at 16% 34%, rgba(255, 90, 0, 0.30), transparent 34%),
         radial-gradient(circle at 76% 18%, rgba(255, 255, 255, 0.12), transparent 28%);
     pointer-events: none;
-}
+} */
 
 .premium-hero-content {
     position: relative;
@@ -1823,7 +1821,7 @@ body {
 
 .premium-hero-van-card img {
     display: block;
-    height: 315px;
+    height: 390px;
     width: 100%;
     object-fit: contain;
     object-position: center;
@@ -1998,9 +1996,7 @@ body {
     }
 
     .premium-hero-overlay {
-        background:
-            linear-gradient(90deg, rgba(7, 7, 7, 0.92) 0%, rgba(7, 7, 7, 0.68) 56%, rgba(7, 7, 7, 0.32) 100%),
-            linear-gradient(0deg, rgba(7, 7, 7, 0.55), rgba(7, 7, 7, 0.16));
+        background: linear-gradient(101deg, rgb(7 7 7 / 24%) 0%, rgb(7 7 7 / 11%) 38%, rgb(7 7 7 / 0%) 68%, rgba(7, 7, 7, 0.18) 100%), linear-gradient(0deg, rgb(7 7 7 / 7%) 0%, rgba(7, 7, 7, 0.08) 42%, rgb(7 7 7 / 4%) 100%);
     }
 
     .premium-hero-text h1 {

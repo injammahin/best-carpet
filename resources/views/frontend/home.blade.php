@@ -157,14 +157,14 @@
                     </div>
                 </div>
 
-                <div class="premium-hero-mascot-card">
+                {{-- <div class="premium-hero-mascot-card">
                     <img src="{{ $heroSideImageTwo }}" alt="Mega Carpets flooring specialist">
                 </div>
 
                 <div class="premium-hero-message-card">
                     <p>{{ $heroCardKicker }}</p>
                     <h3>{{ $heroCardText }}</h3>
-                </div>
+                </div> --}}
             </div>
         </div>
 
