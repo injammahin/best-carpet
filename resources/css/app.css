@@ -1855,7 +1855,7 @@ body {
     position: absolute;
     left: 0;
     bottom: 18px;
-    width: min(70%, 520px);
+    width: min(60%, 520px);
     background: #ffffff;
     border-radius: 7px;
     box-shadow: 0 34px 90px rgba(0, 0, 0, 0.32);
