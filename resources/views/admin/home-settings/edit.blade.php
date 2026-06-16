@@ -184,7 +184,8 @@
                     </div>
                 </section>
 
-                <section class="rounded-[18px] border border-zinc-200 bg-white p-6 shadow-[0_20px_80px_rgba(7,7,7,.06)]">
+                {{-- <section
+                    class="rounded-[18px] border border-zinc-200 bg-white p-6 shadow-[0_20px_80px_rgba(7,7,7,.06)]">
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-orange-600">
                         Room visualiser
                     </p>
@@ -204,8 +205,8 @@
                                 class="w-full rounded-[7px] border border-zinc-200 bg-white px-4 py-3 text-sm">
 
                             @if($homeSetting->imageUrl($homeSetting->visualizer_image))
-                                <img src="{{ $homeSetting->imageUrl($homeSetting->visualizer_image) }}"
-                                    class="mt-3 h-48 w-full rounded-[7px] object-cover">
+                            <img src="{{ $homeSetting->imageUrl($homeSetting->visualizer_image) }}"
+                                class="mt-3 h-48 w-full rounded-[7px] object-cover">
                             @endif
                         </div>
 
@@ -240,7 +241,7 @@
                             </div>
                         </div>
                     </div>
-                </section>
+                </section> --}}
 
                 <section class="rounded-[18px] border border-zinc-200 bg-white p-6 shadow-[0_20px_80px_rgba(7,7,7,.06)]">
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-orange-600">
@@ -440,37 +441,37 @@
 
             document.querySelector('[data-add-slide]')?.addEventListener('click', function () {
                 const html = `
-                                                <div class="repeater-item rounded-[14px] border border-zinc-200 bg-zinc-50 p-5">
-                                                    <div class="mb-4 flex items-center justify-between gap-4">
-                                                        <h3 class="text-lg font-black text-zinc-950">New slide</h3>
-                                                        <button type="button" data-remove-repeater class="rounded-[7px] bg-white px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Remove</button>
+                                                    <div class="repeater-item rounded-[14px] border border-zinc-200 bg-zinc-50 p-5">
+                                                        <div class="mb-4 flex items-center justify-between gap-4">
+                                                            <h3 class="text-lg font-black text-zinc-950">New slide</h3>
+                                                            <button type="button" data-remove-repeater class="rounded-[7px] bg-white px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Remove</button>
+                                                        </div>
+
+                                                        <input type="hidden" name="hero_slides[${slideIndex}][image_existing]" value="">
+
+                                                        <div class="grid gap-4 lg:grid-cols-2">
+                                                            <div>
+                                                                <label class="mb-2 block text-sm font-bold text-zinc-800">Eyebrow</label>
+                                                                <input type="text" name="hero_slides[${slideIndex}][eyebrow]" class="w-full rounded-[7px] border border-zinc-200 px-4 py-3 text-sm">
+                                                            </div>
+
+                                                            <div>
+                                                                <label class="mb-2 block text-sm font-bold text-zinc-800">Slide image</label>
+                                                                <input type="file" name="hero_slides[${slideIndex}][image_file]" class="w-full rounded-[7px] border border-zinc-200 bg-white px-4 py-3 text-sm">
+                                                            </div>
+
+                                                            <div class="lg:col-span-2">
+                                                                <label class="mb-2 block text-sm font-bold text-zinc-800">Headline</label>
+                                                                <input type="text" name="hero_slides[${slideIndex}][title]" class="w-full rounded-[7px] border border-zinc-200 px-4 py-3 text-sm">
+                                                            </div>
+
+                                                            <div class="lg:col-span-2">
+                                                                <label class="mb-2 block text-sm font-bold text-zinc-800">Headline text</label>
+                                                                <textarea name="hero_slides[${slideIndex}][text]" rows="3" class="w-full rounded-[7px] border border-zinc-200 px-4 py-3 text-sm"></textarea>
+                                                            </div>
+                                                        </div>
                                                     </div>
-
-                                                    <input type="hidden" name="hero_slides[${slideIndex}][image_existing]" value="">
-
-                                                    <div class="grid gap-4 lg:grid-cols-2">
-                                                        <div>
-                                                            <label class="mb-2 block text-sm font-bold text-zinc-800">Eyebrow</label>
-                                                            <input type="text" name="hero_slides[${slideIndex}][eyebrow]" class="w-full rounded-[7px] border border-zinc-200 px-4 py-3 text-sm">
-                                                        </div>
-
-                                                        <div>
-                                                            <label class="mb-2 block text-sm font-bold text-zinc-800">Slide image</label>
-                                                            <input type="file" name="hero_slides[${slideIndex}][image_file]" class="w-full rounded-[7px] border border-zinc-200 bg-white px-4 py-3 text-sm">
-                                                        </div>
-
-                                                        <div class="lg:col-span-2">
-                                                            <label class="mb-2 block text-sm font-bold text-zinc-800">Headline</label>
-                                                            <input type="text" name="hero_slides[${slideIndex}][title]" class="w-full rounded-[7px] border border-zinc-200 px-4 py-3 text-sm">
-                                                        </div>
-
-                                                        <div class="lg:col-span-2">
-                                                            <label class="mb-2 block text-sm font-bold text-zinc-800">Headline text</label>
-                                                            <textarea name="hero_slides[${slideIndex}][text]" rows="3" class="w-full rounded-[7px] border border-zinc-200 px-4 py-3 text-sm"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            `;
+                                                `;
 
                 heroSlidesWrapper.insertAdjacentHTML('beforeend', html);
                 slideIndex++;
@@ -478,22 +479,22 @@
 
             document.querySelector('[data-add-project]')?.addEventListener('click', function () {
                 const html = `
-                                                <div class="repeater-item rounded-[14px] border border-zinc-200 bg-zinc-50 p-5">
-                                                    <div class="mb-4 flex items-center justify-between gap-4">
-                                                        <h3 class="text-lg font-black text-zinc-950">New project</h3>
-                                                        <button type="button" data-remove-repeater class="rounded-[7px] bg-white px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Remove</button>
-                                                    </div>
+                                                    <div class="repeater-item rounded-[14px] border border-zinc-200 bg-zinc-50 p-5">
+                                                        <div class="mb-4 flex items-center justify-between gap-4">
+                                                            <h3 class="text-lg font-black text-zinc-950">New project</h3>
+                                                            <button type="button" data-remove-repeater class="rounded-[7px] bg-white px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Remove</button>
+                                                        </div>
 
-                                                    <input type="hidden" name="recent_work_concepts[${projectIndex}][image_existing]" value="">
+                                                        <input type="hidden" name="recent_work_concepts[${projectIndex}][image_existing]" value="">
 
-                                                    <div class="grid gap-4 lg:grid-cols-2">
-                                                        <input type="text" name="recent_work_concepts[${projectIndex}][title]" class="rounded-[7px] border border-zinc-200 px-4 py-3 text-sm" placeholder="Project title">
-                                                        <input type="text" name="recent_work_concepts[${projectIndex}][type]" class="rounded-[7px] border border-zinc-200 px-4 py-3 text-sm" placeholder="Project type">
-                                                        <input type="text" name="recent_work_concepts[${projectIndex}][location]" class="rounded-[7px] border border-zinc-200 px-4 py-3 text-sm" placeholder="Location">
-                                                        <input type="file" name="recent_work_concepts[${projectIndex}][image_file]" class="rounded-[7px] border border-zinc-200 bg-white px-4 py-3 text-sm">
+                                                        <div class="grid gap-4 lg:grid-cols-2">
+                                                            <input type="text" name="recent_work_concepts[${projectIndex}][title]" class="rounded-[7px] border border-zinc-200 px-4 py-3 text-sm" placeholder="Project title">
+                                                            <input type="text" name="recent_work_concepts[${projectIndex}][type]" class="rounded-[7px] border border-zinc-200 px-4 py-3 text-sm" placeholder="Project type">
+                                                            <input type="text" name="recent_work_concepts[${projectIndex}][location]" class="rounded-[7px] border border-zinc-200 px-4 py-3 text-sm" placeholder="Location">
+                                                            <input type="file" name="recent_work_concepts[${projectIndex}][image_file]" class="rounded-[7px] border border-zinc-200 bg-white px-4 py-3 text-sm">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            `;
+                                                `;
 
                 recentWorkWrapper.insertAdjacentHTML('beforeend', html);
                 projectIndex++;

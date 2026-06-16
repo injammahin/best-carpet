@@ -81,7 +81,10 @@ class ProductRangeController extends Controller
 
         $product = ProductRange::create($validated);
 
-        $this->syncColours($product, $request);
+        if ($this->requestHasColourRows($request)) {
+            $this->syncColours($product, $request);
+        }
+
         $this->syncPrices($product, $request);
 
         return redirect()
@@ -139,7 +142,10 @@ class ProductRangeController extends Controller
 
         $product->update($validated);
 
-        $this->syncColours($product, $request);
+        if ($this->requestHasColourRows($request)) {
+            $this->syncColours($product, $request);
+        }
+
         $this->syncPrices($product, $request);
 
         return back()->with('success', 'Product range updated successfully.');
@@ -231,16 +237,6 @@ class ProductRangeController extends Controller
             }
         }
 
-        $colourNames = collect($request->input('colour_names', []))
-            ->map(fn ($name) => trim((string) $name))
-            ->filter();
-
-        if ($colourNames->isEmpty()) {
-            throw ValidationException::withMessages([
-                'colour_names' => 'Please add at least one colour for this product range.',
-            ]);
-        }
-
         $hasAtLeastOnePrice = collect($request->input('prices', []))
             ->filter(fn ($price) => $price !== null && $price !== '')
             ->isNotEmpty();
@@ -254,139 +250,146 @@ class ProductRangeController extends Controller
         return $validated;
     }
 
-private function syncColours(ProductRange $product, Request $request): void
-{
-    $names = $request->input('colour_names', []);
-    $swatches = $request->input('colour_swatches', []);
-    $groups = $request->input('colour_groups', []);
+    private function requestHasColourRows(Request $request): bool
+    {
+        return $request->has('colour_names')
+            || $request->has('colour_swatches')
+            || $request->has('colour_groups');
+    }
 
-    $product->colours()->delete();
+    private function syncColours(ProductRange $product, Request $request): void
+    {
+        $names = $request->input('colour_names', []);
+        $swatches = $request->input('colour_swatches', []);
+        $groups = $request->input('colour_groups', []);
 
-    foreach ($swatches as $index => $swatch) {
-        $swatch = $this->normalizeHexColour($swatch);
+        $product->colours()->delete();
 
-        if (!$swatch) {
-            continue;
+        foreach ($swatches as $index => $swatch) {
+            $swatch = $this->normalizeHexColour($swatch);
+
+            if (!$swatch) {
+                continue;
+            }
+
+            $name = trim((string) ($names[$index] ?? ''));
+            $group = trim((string) ($groups[$index] ?? ''));
+
+            if ($name === '') {
+                $name = $this->guessColourName($swatch);
+            }
+
+            if ($group === '') {
+                $group = $this->guessColourGroup($swatch);
+            }
+
+            ProductColour::create([
+                'product_range_id' => $product->id,
+                'name' => $name,
+                'swatch' => $swatch,
+                'colour_group' => $group,
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    private function normalizeHexColour(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return null;
         }
 
-        $name = trim((string) ($names[$index] ?? ''));
-        $group = trim((string) ($groups[$index] ?? ''));
-
-        if ($name === '') {
-            $name = $this->guessColourName($swatch);
+        if (!str_starts_with($value, '#')) {
+            $value = '#' . $value;
         }
 
-        if ($group === '') {
-            $group = $this->guessColourGroup($swatch);
+        if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $value)) {
+            return null;
         }
 
-        ProductColour::create([
-            'product_range_id' => $product->id,
-            'name' => $name,
-            'swatch' => $swatch,
-            'colour_group' => $group,
-            'sort_order' => $index,
-        ]);
-    }
-}
-
-private function normalizeHexColour(?string $value): ?string
-{
-    $value = trim((string) $value);
-
-    if ($value === '') {
-        return null;
+        return strtoupper($value);
     }
 
-    if (!str_starts_with($value, '#')) {
-        $value = '#' . $value;
+    private function guessColourName(string $hex): string
+    {
+        $group = $this->guessColourGroup($hex);
+
+        return match ($group) {
+            'Black' => 'Deep Black',
+            'White' => 'Soft White',
+            'Grey' => 'Soft Grey',
+            'Brown' => 'Warm Brown',
+            'Blue' => 'Classic Blue',
+            'Green' => 'Natural Green',
+            'Red' => 'Deep Red',
+            'Orange' => 'Warm Orange',
+            'Yellow' => 'Soft Yellow',
+            'Purple' => 'Soft Purple',
+            'Pink' => 'Soft Pink',
+            default => 'Warm Neutral',
+        };
     }
 
-    if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $value)) {
-        return null;
-    }
+    private function guessColourGroup(string $hex): string
+    {
+        $hex = ltrim($hex, '#');
 
-    return strtoupper($value);
-}
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
 
-private function guessColourName(string $hex): string
-{
-    $group = $this->guessColourGroup($hex);
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $delta = $max - $min;
 
-    return match ($group) {
-        'Black' => 'Deep Black',
-        'White' => 'Soft White',
-        'Grey' => 'Soft Grey',
-        'Brown' => 'Warm Brown',
-        'Blue' => 'Classic Blue',
-        'Green' => 'Natural Green',
-        'Red' => 'Deep Red',
-        'Orange' => 'Warm Orange',
-        'Yellow' => 'Soft Yellow',
-        'Purple' => 'Soft Purple',
-        'Pink' => 'Soft Pink',
-        default => 'Warm Neutral',
-    };
-}
-
-private function guessColourGroup(string $hex): string
-{
-    $hex = ltrim($hex, '#');
-
-    $r = hexdec(substr($hex, 0, 2));
-    $g = hexdec(substr($hex, 2, 2));
-    $b = hexdec(substr($hex, 4, 2));
-
-    $max = max($r, $g, $b);
-    $min = min($r, $g, $b);
-    $delta = $max - $min;
-
-    if ($max < 35) {
-        return 'Black';
-    }
-
-    if ($min > 225) {
-        return 'White';
-    }
-
-    if ($delta < 18) {
-        return 'Grey';
-    }
-
-    if ($r > $g && $r > $b) {
-        if ($g > 150 && $b < 90) {
-            return 'Yellow';
+        if ($max < 35) {
+            return 'Black';
         }
 
-        if ($g > 90 && $b < 90) {
-            return 'Orange';
+        if ($min > 225) {
+            return 'White';
         }
 
-        if ($b > 120) {
-            return 'Pink';
+        if ($delta < 18) {
+            return 'Grey';
         }
 
-        return 'Red';
-    }
+        if ($r > $g && $r > $b) {
+            if ($g > 150 && $b < 90) {
+                return 'Yellow';
+            }
 
-    if ($g > $r && $g > $b) {
-        return 'Green';
-    }
+            if ($g > 90 && $b < 90) {
+                return 'Orange';
+            }
 
-    if ($b > $r && $b > $g) {
-        if ($r > 110) {
-            return 'Purple';
+            if ($b > 120) {
+                return 'Pink';
+            }
+
+            return 'Red';
         }
 
-        return 'Blue';
-    }
+        if ($g > $r && $g > $b) {
+            return 'Green';
+        }
 
-    if ($r > 100 && $g > 70 && $b < 80) {
-        return 'Brown';
-    }
+        if ($b > $r && $b > $g) {
+            if ($r > 110) {
+                return 'Purple';
+            }
 
-    return 'Neutral';
-}
+            return 'Blue';
+        }
+
+        if ($r > 100 && $g > 70 && $b < 80) {
+            return 'Brown';
+        }
+
+        return 'Neutral';
+    }
 
     private function syncPrices(ProductRange $product, Request $request): void
     {

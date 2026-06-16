@@ -373,7 +373,7 @@
                     @endforeach
                 </nav>
 
-                <div class="mega-product-right">
+                {{-- <div class="mega-product-right">
                     <a href="{{ route('frontend.contact') }}" class="mega-side-link">
                         <span class="premium-mini-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -393,7 +393,7 @@
                         </span>
                         Measure & quote
                     </a>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

@@ -238,7 +238,7 @@
         </div>
     </section>
 
-    <section id="visualizer" class="bg-[#f7f3ed] py-20">
+    {{-- <section id="visualizer" class="bg-[#f7f3ed] py-20">
         <div class="site-container grid items-center gap-10 lg:grid-cols-[.85fr_1.15fr]">
             <div>
                 <p class="section-kicker">{{ $visualizerKicker }}</p>
@@ -249,10 +249,10 @@
 
                 <div class="mt-8 grid gap-3 sm:grid-cols-2">
                     @foreach($visualizerFeatures as $item)
-                        <div class="flex items-center gap-3 bg-white p-4 shadow-sm radius-7">
-                            <span class="text-mega-orange">✓</span>
-                            <span class="font-medium text-mega-black">{{ $item }}</span>
-                        </div>
+                    <div class="flex items-center gap-3 bg-white p-4 shadow-sm radius-7">
+                        <span class="text-mega-orange">✓</span>
+                        <span class="font-medium text-mega-black">{{ $item }}</span>
+                    </div>
                     @endforeach
                 </div>
 
@@ -285,7 +285,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     <section id="products" class="bg-white py-16" data-home-products>
         @php
@@ -313,13 +313,13 @@
             <div class="mb-8 grid gap-6 lg:grid-cols-[1fr_620px] lg:items-end">
                 <div class="max-w-3xl">
                     <p class="section-kicker">Featured products</p>
-
                     <h2 class="section-title-premium">
-                        Select colour, choose type and see the price.
+                        Select type and see the rough price estimate.
                     </h2>
 
                     <p class="section-lead">
-                        Browse selected {{ $defaultHomeCategoryName }} ranges, compare colours, check indicative pricing and
+                        Browse selected {{ $defaultHomeCategoryName }} ranges, choose a product type, check indicative
+                        pricing and
                         save your favourites before booking a free measure and quote.
                     </p>
                 </div>
@@ -389,6 +389,17 @@
                                 'slug' => $product['slug'],
                                 'image' => $product['image'],
                             ];
+
+                            $typeOptions = collect($product['variants'] ?? [])
+                                ->flatMap(fn($variant) => $variant['types'] ?? [])
+                                ->filter(fn($type) => !empty($type['label']))
+                                ->unique('label')
+                                ->map(fn($type) => [
+                                    'label' => $type['label'],
+                                    'price' => $type['price'] ?? 0,
+                                ])
+                                ->values()
+                                ->all();
                         @endphp
 
                         <article data-product-card data-home-product-card data-home-set="{{ $setKey }}"
@@ -396,22 +407,12 @@
                             data-category-slug="{{ $product['category_slug'] ?? '' }}" data-room="{{ $product['room'] }}"
                             data-search="{{ strtolower($product['name'] . ' ' . $product['category'] . ' ' . $product['room'] . ' ' . $product['tag']) }}"
                             data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
-                            data-variants='@json($product['variants'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
+                            data-types='@json($typeOptions, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
                             class="premium-card flooring-product-card group overflow-hidden"
                             style="{{ $setKey !== $defaultHomeCategorySlug ? 'display:none;' : '' }}">
                             <div class="relative h-44 overflow-hidden bg-mega-soft">
                                 <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
                                     class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
-
-                                <div
-                                    class="absolute left-3 top-3 flex items-center gap-2 bg-white/92 px-3 py-1.5 text-xs font-medium text-mega-black shadow-sm backdrop-blur radius-7">
-                                    <svg class="h-3.5 w-3.5 fill-mega-orange text-mega-orange" viewBox="0 0 24 24"
-                                        fill="currentColor">
-                                        <path d="M12 2l2.7 6.8L22 9.3l-5.6 4.7 1.8 7L12 17.2 5.8 21l1.8-7L2 9.3l7.3-.5L12 2z" />
-                                    </svg>
-
-                                    <span>{{ $product['rating'] }}</span>
-                                </div>
 
                                 <button type="button"
                                     class="wishlist-toggle absolute right-3 top-3 grid h-9 w-9 place-items-center bg-white/92 text-mega-black shadow-sm backdrop-blur transition hover:text-mega-orange radius-7"
@@ -440,51 +441,32 @@
                                     {{ $product['name'] }}
                                 </h3>
 
-                                <div class="mt-3">
-                                    <div class="mb-2 flex items-center justify-between">
-                                        <p class="text-sm font-medium text-mega-text">
-                                            Colour
-                                        </p>
-
-                                        <p class="text-xs font-medium text-mega-muted" data-selected-colour>
-                                            Select colour
-                                        </p>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-2" data-colour-list>
-                                        @foreach($product['variants'] as $index => $variant)
-                                            <button type="button" data-colour-index="{{ $index }}"
-                                                data-colour-name="{{ $variant['name'] }}"
-                                                class="colour-choice h-8 w-8 border border-mega-line shadow-inner radius-7"
-                                                style="background-color: {{ $variant['swatch'] }}"
-                                                aria-label="{{ $variant['name'] }}"></button>
-                                        @endforeach
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <p class="mb-2 text-sm font-medium text-mega-text">
+                                <div class="mt-4">
+                                    <label class="mb-2 block text-sm font-medium text-mega-text">
                                         Type
-                                    </p>
+                                    </label>
 
-                                    <div class="grid gap-2" data-type-list>
-                                        <button type="button"
-                                            class="type-placeholder input-clean cursor-not-allowed py-3 text-left text-sm opacity-60"
-                                            disabled>
-                                            Choose colour first
-                                        </button>
-                                    </div>
+                                    <select class="input-clean" data-type-select>
+                                        <option value="">Select type</option>
+
+                                        @foreach($typeOptions as $type)
+                                            <option value="{{ $type['label'] }}" data-type-label="{{ $type['label'] }}"
+                                                data-type-price="{{ $type['price'] }}">
+                                                {{ $type['label'] }} - ${{ number_format($type['price'], 0) }}/m²
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="mt-4 bg-[#f7f3ed] p-3 radius-7">
                                     <div class="flex items-center justify-between gap-3">
                                         <div>
                                             <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-mega-muted">
-                                                Indicative price
+                                                Rough price estimate
                                             </p>
 
                                             <p class="text-xl font-semibold leading-tight text-mega-black" data-price-output>
-                                                Select options
+                                                Select type
                                             </p>
                                         </div>
 
@@ -497,7 +479,8 @@
 
                                 <div class="mt-4 grid grid-cols-[1fr_auto] gap-3">
                                     <button type="button" data-add-quote
-                                        class="btn-primary w-full justify-center py-3 text-sm opacity-60" disabled>
+                                        class="btn-primary w-full justify-center py-3 text-sm opacity-60 cursor-not-allowed"
+                                        disabled>
                                         Add to quote
                                     </button>
 
@@ -970,9 +953,46 @@
 
                     <input name="approximate_size" value="{{ old('approximate_size') }}" class="input-clean"
                         placeholder="Approx room size, e.g. 4m x 5m">
+                    <div class="md:col-span-2 hidden" data-selected-products-wrap>
+                        <div class="rounded-[7px] border border-orange-200 bg-orange-50/40 p-5">
+                            <div class="mb-4 flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-black uppercase tracking-[0.22em] text-mega-orange">
+                                        Selected products
+                                    </p>
 
-                    <textarea name="message" class="input-clean md:col-span-2" rows="5"
-                        placeholder="Tell us about the project, preferred colour, budget, address area or installation timeline...">{{ old('message') }}</textarea>
+                                    <h3 class="mt-1 text-xl font-black text-mega-black">
+                                        Products added to quote
+                                    </h3>
+                                </div>
+
+                                <span data-selected-products-count
+                                    class="rounded-full bg-mega-orange px-3 py-1 text-xs font-black text-white">
+                                    0 item
+                                </span>
+                            </div>
+
+                            <div class="space-y-3" data-selected-products-preview></div>
+
+                            <p
+                                class="mt-4 rounded-[7px] bg-white px-4 py-3 text-xs font-semibold leading-5 text-mega-muted">
+                                Final quote may change after measurement, installation requirements, preparation, underlay
+                                and product availability.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="mb-2 block text-sm font-bold text-mega-black">
+                            Additional comments
+                        </label>
+
+                        <textarea data-customer-note class="input-clean" rows="5"
+                            placeholder="Tell us about the project, preferred product, budget, address area or installation timeline..."></textarea>
+
+                        <input type="hidden" id="quoteMessage" name="message" data-quote-message
+                            value="{{ old('message') }}">
+                    </div>
                 </div>
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1083,7 +1103,7 @@
                         <div>
                             <h3 class="text-xl font-semibold text-mega-black">No products saved yet</h3>
                             <p class="mt-2 text-sm font-normal text-mega-muted">
-                                Select colour and type, then add products to your quote.
+                                Select a product type, then add products to your quote.
                             </p>
                         </div>
                     </div>
@@ -1104,7 +1124,7 @@
                         </p>
                     </div>
 
-                    <a href="#quote" data-close-drawer class="btn-primary w-full justify-center">
+                    <a href="#quote" data-continue-quote data-close-drawer class="btn-primary w-full justify-center">
                         Continue to quote form
                     </a>
                 </div>

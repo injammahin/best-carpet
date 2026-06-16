@@ -54,9 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const quoteLineKey = (item = {}) => {
         return [
             item.id || item.slug || item.name || '',
+            item.size_label || item.size || '',
+            item.sqm || '',
             item.colour || '',
             item.type || '',
-            item.size_label || '',
         ].join('|');
     };
 
@@ -76,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const card = button?.closest('[data-product-card]');
+
         return parseJson(card?.dataset?.product, {});
     };
 
@@ -88,7 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const oldItems = storage.get(oldKey);
 
                 oldItems.forEach((oldItem) => {
-                    const exists = mainItems.some((item) => productKey(item) === productKey(oldItem));
+                    const exists = mainItems.some((item) => {
+                        return productKey(item) === productKey(oldItem);
+                    });
 
                     if (!exists) {
                         mainItems.push(oldItem);
@@ -142,7 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
             .forEach((button) => {
                 const product = parseButtonProduct(button);
                 const id = String(button.dataset.productId || productKey(product));
-                const active = wishlistItems.some((item) => productKey(item) === id);
+
+                const active = wishlistItems.some((item) => {
+                    return productKey(item) === id;
+                });
 
                 button.classList.toggle('is-active', active);
 
@@ -153,6 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Header
+    |--------------------------------------------------------------------------
+    */
 
     const megaHeader = document.querySelector('[data-mega-header]');
     let lastHeaderScroll = window.scrollY || 0;
@@ -173,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         mobileMenu.classList.toggle('is-open', isOpen);
+        mobileMenuButton?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 
         if (menuOpenIcon && menuCloseIcon) {
             menuOpenIcon.classList.toggle('hidden', isOpen);
@@ -300,8 +314,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hero Slider
+    |--------------------------------------------------------------------------
+    */
+
     function initHeroSlider() {
         const hero = document.querySelector('[data-hero-slider]');
+
         let slides = [];
         let contents = [];
         let dots = [];
@@ -394,6 +415,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initHeroSlider();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product Filters
+    |--------------------------------------------------------------------------
+    */
 
     function initProductFilter() {
         const searchInput = document.querySelector('[data-product-search]');
@@ -520,6 +547,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initHomeProductFilter();
 
+    /*
+    |--------------------------------------------------------------------------
+    | Drawers
+    |--------------------------------------------------------------------------
+    */
+
     const quoteDrawer = document.querySelector('[data-quote-drawer]');
     const wishlistDrawer = document.querySelector('[data-wishlist-drawer]');
 
@@ -544,6 +577,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Quote Basket
+    |--------------------------------------------------------------------------
+    */
+
     function createQuoteItem(product, extra = {}) {
         return {
             id: product.id || product.slug || product.name,
@@ -552,10 +591,10 @@ document.addEventListener('DOMContentLoaded', () => {
             category: product.category || '',
             image: product.image || '',
             price: Number(extra.price ?? product.price ?? product.price_from ?? 0),
-            regular: Number(extra.regular ?? product.regular ?? 0),
+            regular: Number(extra.regular ?? extra.regular_price ?? product.regular ?? product.regular_price ?? 0),
             colour: extra.colour || product.colour || '',
             type: extra.type || product.type || '',
-            size_label: extra.size_label || product.size_label || '',
+            size_label: extra.size_label || extra.size || product.size_label || product.size || '',
             sqm: extra.sqm || product.sqm || '',
             qty: Number(extra.qty || product.qty || 1),
         };
@@ -584,10 +623,14 @@ document.addEventListener('DOMContentLoaded', () => {
         saveQuoteItems(items);
         renderQuoteDrawer();
         openDrawer(quoteDrawer);
+
+        document.dispatchEvent(new CustomEvent('megaQuoteUpdated'));
     }
 
     function removeQuoteItem(lineKey) {
-        const items = getQuoteItems().filter((item) => quoteLineKey(item) !== String(lineKey));
+        const items = getQuoteItems().filter((item) => {
+            return quoteLineKey(item) !== String(lineKey);
+        });
 
         saveQuoteItems(items);
         renderQuoteDrawer();
@@ -620,6 +663,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const emptyText = empty.querySelector('p');
+
+        if (emptyText) {
+            emptyText.textContent = 'Select a size, then add products to your quote.';
+        }
+
         const items = getQuoteItems();
 
         list.innerHTML = '';
@@ -633,6 +682,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const lineKey = quoteLineKey(item);
             const row = document.createElement('div');
 
+            const metaParts = [
+                item.category || '',
+                item.size_label || item.size || '',
+                item.sqm ? `${item.sqm}m²` : '',
+                item.colour || '',
+                item.type || '',
+            ].filter(Boolean);
+
             row.className = 'grid grid-cols-[78px_1fr_auto] gap-3 border border-mega-line bg-white p-3 shadow-sm radius-7';
 
             row.innerHTML = `
@@ -642,14 +699,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h4 class="text-sm font-semibold leading-tight text-mega-black">${escapeHtml(item.name)}</h4>
 
                     <p class="mt-1 text-xs text-mega-muted">
-                        ${escapeHtml(item.category || '')}
-                        ${item.colour ? ' · ' + escapeHtml(item.colour) : ''}
+                        ${escapeHtml(metaParts.join(' · '))}
                     </p>
 
-                    ${item.type || item.size_label ? `<p class="mt-1 text-xs text-mega-muted">${escapeHtml(item.type || item.size_label)}</p>` : ''}
-
                     <p class="mt-2 text-sm font-semibold text-mega-black">
-                        ${money(item.price)}${item.sqm ? ` · ${escapeHtml(item.sqm)}m²` : '/m²'}
+                        ${money(item.price)}
                     </p>
 
                     <div class="mt-3 flex w-fit items-center rounded-[7px] border border-mega-line">
@@ -670,17 +724,29 @@ document.addEventListener('DOMContentLoaded', () => {
         totalNode.textContent = money(total);
 
         list.querySelectorAll('[data-remove-quote]').forEach((button) => {
-            button.addEventListener('click', () => removeQuoteItem(button.dataset.removeQuote));
+            button.addEventListener('click', () => {
+                removeQuoteItem(button.dataset.removeQuote);
+            });
         });
 
         list.querySelectorAll('[data-qty-minus]').forEach((button) => {
-            button.addEventListener('click', () => updateQuoteQty(button.dataset.qtyMinus, -1));
+            button.addEventListener('click', () => {
+                updateQuoteQty(button.dataset.qtyMinus, -1);
+            });
         });
 
         list.querySelectorAll('[data-qty-plus]').forEach((button) => {
-            button.addEventListener('click', () => updateQuoteQty(button.dataset.qtyPlus, 1));
+            button.addEventListener('click', () => {
+                updateQuoteQty(button.dataset.qtyPlus, 1);
+            });
         });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Wishlist
+    |--------------------------------------------------------------------------
+    */
 
     function toggleWishlist(product) {
         if (!product || !Object.keys(product).length) {
@@ -700,10 +766,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const key = productKey(cleanProduct);
 
         let items = getWishlistItems();
-        const exists = items.some((item) => productKey(item) === key);
+
+        const exists = items.some((item) => {
+            return productKey(item) === key;
+        });
 
         if (exists) {
-            items = items.filter((item) => productKey(item) !== key);
+            items = items.filter((item) => {
+                return productKey(item) !== key;
+            });
         } else {
             items.push(cleanProduct);
         }
@@ -713,7 +784,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function removeWishlistItem(key) {
-        const items = getWishlistItems().filter((item) => productKey(item) !== String(key));
+        const items = getWishlistItems().filter((item) => {
+            return productKey(item) !== String(key);
+        });
 
         saveWishlistItems(items);
         renderWishlistDrawer();
@@ -746,11 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="mt-1 text-xs text-mega-muted">${escapeHtml(item.category || '')}</p>
 
                     <div class="mt-3 flex flex-wrap gap-2">
-                        <button type="button" class="rounded-[7px] bg-mega-orange px-3 py-2 text-xs font-extrabold text-white" data-wishlist-add-quote="${escapeHtml(key)}">
-                            Add to quote
-                        </button>
-
-                        ${item.slug ? `<a href="/products/${escapeHtml(item.slug)}" class="rounded-[7px] bg-mega-soft px-3 py-2 text-xs font-extrabold text-mega-black">View</a>` : ''}
+                        ${item.slug ? `<a href="/products/${escapeHtml(item.slug)}" class="rounded-[7px] bg-mega-orange px-3 py-2 text-xs font-extrabold text-white">View product</a>` : ''}
 
                         <button type="button" class="rounded-[7px] bg-mega-soft px-3 py-2 text-xs font-extrabold text-mega-black" data-remove-wishlist="${escapeHtml(key)}">
                             Remove
@@ -767,18 +836,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         list.querySelectorAll('[data-remove-wishlist]').forEach((button) => {
-            button.addEventListener('click', () => removeWishlistItem(button.dataset.removeWishlist));
-        });
-
-        list.querySelectorAll('[data-wishlist-add-quote]').forEach((button) => {
             button.addEventListener('click', () => {
-                const item = getWishlistItems().find((product) => {
-                    return productKey(product) === String(button.dataset.wishlistAddQuote);
-                });
-
-                if (item) {
-                    addToQuote(item);
-                }
+                removeWishlistItem(button.dataset.removeWishlist);
             });
         });
     }
@@ -801,207 +860,408 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', closeDrawers);
     });
 
-    function initVariantProductCards() {
+    /*
+    |--------------------------------------------------------------------------
+    | Size-only product cards
+    |--------------------------------------------------------------------------
+    | Product flow:
+    | Choose size -> show rough price estimate -> add to quote
+    */
+
+    function getSizeFromOption(option, product) {
+        if (!option || !option.value) {
+            return null;
+        }
+
+        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+        const sizeFromProduct = sizes[Number(option.value)] || {};
+
+        const label = option.dataset.label || sizeFromProduct.label || option.textContent.trim();
+        const sqm = option.dataset.sqm || sizeFromProduct.sqm || '';
+        const price = Number(option.dataset.price ?? sizeFromProduct.price ?? 0);
+        const regular = Number(
+            option.dataset.regularPrice ??
+            option.dataset.regular ??
+            sizeFromProduct.regular_price ??
+            sizeFromProduct.regular ??
+            price
+        );
+
+        return {
+            label,
+            sqm,
+            price,
+            regular,
+        };
+    }
+
+    function setAddButtonState(button, disabled) {
+        if (!button) {
+            return;
+        }
+
+        button.disabled = disabled;
+        button.classList.toggle('opacity-60', disabled);
+        button.classList.toggle('cursor-not-allowed', disabled);
+    }
+
+    function initSizeOnlyProductCards() {
         document.querySelectorAll('[data-product-card]').forEach((card) => {
             const product = parseJson(card.dataset.product, {});
-            const variants = parseJson(card.dataset.variants, []);
-
-            const colourIndexButtons = card.querySelectorAll('[data-colour-index]');
-            const colourButtons = card.querySelectorAll('[data-colour-button]');
-            const selectedColourNode = card.querySelector('[data-selected-colour], [data-selected-colour-text]');
-            const typeList = card.querySelector('[data-type-list]');
-            const priceOutput = card.querySelector('[data-price-output]');
-            const addQuoteButton = card.querySelector('[data-add-quote]');
             const sizeSelect = card.querySelector('[data-size-select]');
             const pricePanel = card.querySelector('[data-price-panel]');
             const priceText = card.querySelector('[data-price-text]');
             const regularText = card.querySelector('[data-regular-text]');
+            const priceOutput = card.querySelector('[data-price-output]');
+            const addQuoteButton = card.querySelector('[data-add-quote]');
 
-            let selectedColour = null;
-            let selectedType = null;
+            if (!sizeSelect || !addQuoteButton) {
+                return;
+            }
+
+            addQuoteButton.dataset.jsBound = '1';
+
             let selectedSize = null;
 
-            const markAddButtonDisabled = (disabled) => {
-                if (!addQuoteButton) {
+            sizeSelect.disabled = false;
+
+            const firstOption = sizeSelect.querySelector('option[value=""]');
+
+            if (firstOption && firstOption.textContent.toLowerCase().includes('colour')) {
+                firstOption.textContent = 'Choose a size for rough estimate...';
+            }
+
+            if (!firstOption && sizeSelect.options.length) {
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Choose a size for rough estimate...';
+                sizeSelect.prepend(placeholder);
+                sizeSelect.value = '';
+            }
+
+            setAddButtonState(addQuoteButton, true);
+            pricePanel?.classList.add('hidden');
+
+            const resetEstimate = () => {
+                selectedSize = null;
+
+                if (priceText) {
+                    priceText.textContent = '$0';
+                }
+
+                if (regularText) {
+                    regularText.textContent = '$0';
+                }
+
+                if (priceOutput) {
+                    priceOutput.textContent = 'Select size';
+                }
+
+                pricePanel?.classList.add('hidden');
+                setAddButtonState(addQuoteButton, true);
+            };
+
+            sizeSelect.addEventListener('change', () => {
+                const option = sizeSelect.options[sizeSelect.selectedIndex];
+                selectedSize = getSizeFromOption(option, product);
+
+                if (!selectedSize) {
+                    resetEstimate();
                     return;
                 }
 
+                if (priceText) {
+                    priceText.textContent = money(selectedSize.price);
+                }
+
+                if (regularText) {
+                    regularText.textContent = selectedSize.regular > 0
+                        ? money(selectedSize.regular)
+                        : money(selectedSize.price);
+                }
+
+                if (priceOutput) {
+                    priceOutput.textContent = money(selectedSize.price);
+                }
+
+                pricePanel?.classList.remove('hidden');
+                setAddButtonState(addQuoteButton, false);
+            });
+
+            addQuoteButton.addEventListener('click', () => {
+                if (!selectedSize) {
+                    sizeSelect.focus();
+                    return;
+                }
+
+                addToQuote(product, {
+                    size_label: selectedSize.label,
+                    sqm: selectedSize.sqm,
+                    price: selectedSize.price,
+                    regular: selectedSize.regular,
+                });
+
+                const originalText = addQuoteButton.textContent;
+
+                addQuoteButton.textContent = 'Added to quote';
+
+                setTimeout(() => {
+                    addQuoteButton.textContent = originalText || 'Add to quote';
+                }, 1200);
+            });
+        });
+    }
+    function formatQuoteItemsForMessage() {
+        const items = getQuoteItems();
+        const customerNote = document.querySelector('[data-customer-note]')?.value.trim() || '';
+
+        const lines = [];
+
+        if (items.length) {
+            lines.push('Selected Products for Quote');
+            lines.push('');
+
+            items.forEach((item, index) => {
+                lines.push(`${index + 1}. ${item.name || 'Product'}`);
+
+                if (item.category) {
+                    lines.push(`Category: ${item.category}`);
+                }
+
+                if (item.type) {
+                    lines.push(`Type: ${item.type}`);
+                }
+
+                if (item.size_label || item.size) {
+                    lines.push(`Size / Area: ${item.size_label || item.size}`);
+                }
+
+                if (item.sqm) {
+                    lines.push(`Area: ${item.sqm}m²`);
+                }
+
+                if (item.price) {
+                    lines.push(`Rough Estimate: ${money(item.price)}`);
+                }
+
+                if (item.qty) {
+                    lines.push(`Quantity: ${item.qty}`);
+                }
+
+                lines.push('');
+            });
+
+            lines.push('Note: Final quote may change after measurement, installation requirements, preparation, underlay and product availability.');
+        }
+
+        if (customerNote) {
+            if (lines.length) {
+                lines.push('');
+            }
+
+            lines.push('Customer Additional Comments');
+            lines.push(customerNote);
+        }
+
+        return lines.join('\n').trim();
+    }
+
+    function renderSelectedProductsPreview() {
+        const wrap = document.querySelector('[data-selected-products-wrap]');
+        const preview = document.querySelector('[data-selected-products-preview]');
+        const countBadge = document.querySelector('[data-selected-products-count]');
+
+        if (!wrap || !preview) {
+            return;
+        }
+
+        const items = getQuoteItems();
+
+        wrap.classList.toggle('hidden', items.length === 0);
+        preview.innerHTML = '';
+
+        if (countBadge) {
+            countBadge.textContent = `${items.length} ${items.length === 1 ? 'item' : 'items'}`;
+        }
+
+        items.forEach((item, index) => {
+            const metaParts = [
+                item.category || '',
+                item.type ? `Type: ${item.type}` : '',
+                item.size_label || item.size ? `Size: ${item.size_label || item.size}` : '',
+                item.sqm ? `${item.sqm}m²` : '',
+                item.qty ? `Qty ${item.qty}` : '',
+            ].filter(Boolean);
+
+            const card = document.createElement('div');
+
+            card.className = 'grid gap-4 rounded-[7px] border border-orange-100 bg-white p-4 shadow-sm sm:grid-cols-[72px_1fr_auto] sm:items-center';
+
+            card.innerHTML = `
+            <div class="h-[72px] w-[72px] overflow-hidden rounded-[7px] bg-mega-soft">
+                ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name || 'Product')}" class="h-full w-full object-cover">` : ''}
+            </div>
+
+            <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-mega-orange/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-mega-orange">
+                        Product ${index + 1}
+                    </span>
+                </div>
+
+                <h4 class="mt-2 text-base font-black leading-tight text-mega-black">
+                    ${escapeHtml(item.name || 'Product')}
+                </h4>
+
+                <p class="mt-1 text-sm font-semibold leading-6 text-mega-muted">
+                    ${escapeHtml(metaParts.join(' · '))}
+                </p>
+            </div>
+
+            <div class="rounded-[7px] bg-[#f7f3ed] px-4 py-3 text-right">
+                <p class="text-[10px] font-black uppercase tracking-[0.16em] text-mega-muted">
+                    Rough estimate
+                </p>
+
+                <p class="mt-1 text-xl font-black text-mega-black">
+                    ${money(item.price || 0)}
+                </p>
+            </div>
+        `;
+
+            preview.appendChild(card);
+        });
+    }
+
+    function syncQuoteItemsToQuoteForm() {
+        const messageField = document.querySelector('[data-quote-message]');
+
+        if (!messageField) {
+            return;
+        }
+
+        renderSelectedProductsPreview();
+
+        messageField.value = formatQuoteItemsForMessage();
+
+        messageField.dispatchEvent(new Event('input', { bubbles: true }));
+        messageField.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function goToQuoteFormWithProducts(event) {
+        syncQuoteItemsToQuoteForm();
+
+        const quoteSection = document.querySelector('#quote');
+        const measureForm = document.querySelector('#measureQuoteForm');
+
+        if (quoteSection || measureForm) {
+            event?.preventDefault();
+
+            closeDrawers();
+
+            const target = quoteSection || measureForm;
+
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            });
+
+            setTimeout(() => {
+                const noteField = document.querySelector('[data-customer-note]');
+                noteField?.focus();
+            }, 500);
+        }
+    }
+
+    document.querySelectorAll('[data-continue-quote]').forEach((button) => {
+        button.addEventListener('click', goToQuoteFormWithProducts);
+    });
+
+    document.querySelector('[data-customer-note]')?.addEventListener('input', syncQuoteItemsToQuoteForm);
+
+    if (window.location.hash === '#quote' || document.querySelector('#measureQuoteForm')) {
+        setTimeout(() => {
+            syncQuoteItemsToQuoteForm();
+        }, 250);
+    }
+
+    document.addEventListener('megaQuoteUpdated', () => {
+        syncQuoteItemsToQuoteForm();
+    });
+    initSizeOnlyProductCards();
+    function initTypeOnlyProductCards() {
+        document.querySelectorAll('[data-product-card][data-types]').forEach((card) => {
+            const product = parseJson(card.dataset.product, {});
+            const typeSelect = card.querySelector('[data-type-select]');
+            const priceOutput = card.querySelector('[data-price-output]');
+            const addQuoteButton = card.querySelector('[data-add-quote]');
+
+            if (!typeSelect || !addQuoteButton) {
+                return;
+            }
+
+            addQuoteButton.dataset.jsBound = '1';
+
+            let selectedType = null;
+
+            const setAddButtonState = (disabled) => {
                 addQuoteButton.disabled = disabled;
                 addQuoteButton.classList.toggle('opacity-60', disabled);
+                addQuoteButton.classList.toggle('cursor-not-allowed', disabled);
             };
 
-            if (colourIndexButtons.length && variants.length && typeList && addQuoteButton) {
-                addQuoteButton.dataset.jsBound = '1';
-                markAddButtonDisabled(true);
+            setAddButtonState(true);
 
-                const resetType = () => {
+            typeSelect.addEventListener('change', () => {
+                const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+
+                if (!selectedOption || !selectedOption.value) {
                     selectedType = null;
 
                     if (priceOutput) {
                         priceOutput.textContent = 'Select type';
                     }
 
-                    markAddButtonDisabled(true);
+                    setAddButtonState(true);
+                    return;
+                }
+
+                selectedType = {
+                    label: selectedOption.dataset.typeLabel || selectedOption.value,
+                    price: Number(selectedOption.dataset.typePrice || 0),
                 };
 
-                const renderTypes = (types = []) => {
-                    typeList.innerHTML = '';
+                if (priceOutput) {
+                    priceOutput.textContent = money(selectedType.price) + '/m²';
+                }
 
-                    if (!types.length) {
-                        typeList.innerHTML = `
-                            <button type="button" class="type-placeholder input-clean cursor-not-allowed py-3 text-left text-sm opacity-60" disabled>
-                                No type available
-                            </button>
-                        `;
-                        return;
-                    }
+                setAddButtonState(false);
+            });
 
-                    types.forEach((type) => {
-                        const button = document.createElement('button');
+            addQuoteButton.addEventListener('click', () => {
+                if (!selectedType) {
+                    typeSelect.focus();
+                    return;
+                }
 
-                        button.type = 'button';
-                        button.className = 'type-choice';
-                        button.textContent = `${type.label} · ${money(type.price)}/m²`;
-
-                        button.addEventListener('click', () => {
-                            typeList.querySelectorAll('.type-choice').forEach((item) => {
-                                item.classList.remove('is-active');
-                            });
-
-                            button.classList.add('is-active');
-
-                            selectedType = {
-                                label: type.label,
-                                price: Number(type.price || 0),
-                            };
-
-                            if (priceOutput) {
-                                priceOutput.textContent = `${money(type.price)}/m²`;
-                            }
-
-                            markAddButtonDisabled(false);
-                        });
-
-                        typeList.appendChild(button);
-                    });
-                };
-
-                colourIndexButtons.forEach((button) => {
-                    button.addEventListener('click', () => {
-                        const index = Number(button.dataset.colourIndex);
-                        selectedColour = variants[index];
-
-                        colourIndexButtons.forEach((item) => item.classList.remove('is-active'));
-                        button.classList.add('is-active');
-
-                        if (selectedColourNode) {
-                            selectedColourNode.textContent = selectedColour?.name || 'Select colour';
-                        }
-
-                        resetType();
-                        renderTypes(selectedColour?.types || []);
-                    });
+                addToQuote(product, {
+                    type: selectedType.label,
+                    price: selectedType.price,
                 });
 
-                addQuoteButton.addEventListener('click', () => {
-                    if (!selectedColour || !selectedType) {
-                        return;
-                    }
+                const originalText = addQuoteButton.textContent;
 
-                    addToQuote(product, {
-                        colour: selectedColour.name,
-                        type: selectedType.label,
-                        price: selectedType.price,
-                    });
-                });
-            }
+                addQuoteButton.textContent = 'Added to quote';
 
-            if (colourButtons.length && sizeSelect && addQuoteButton) {
-                addQuoteButton.dataset.jsBound = '1';
-                markAddButtonDisabled(true);
-
-                colourButtons.forEach((button) => {
-                    button.addEventListener('click', () => {
-                        selectedColour = button.dataset.colourName || button.dataset.colour || '';
-
-                        colourButtons.forEach((item) => item.classList.remove('is-active'));
-                        button.classList.add('is-active');
-
-                        if (selectedColourNode) {
-                            selectedColourNode.textContent = selectedColour;
-                        }
-
-                        selectedSize = null;
-                        sizeSelect.disabled = false;
-                        sizeSelect.innerHTML = '<option value="">Choose size...</option>';
-
-                        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-
-                        sizes.forEach((size, index) => {
-                            const option = document.createElement('option');
-
-                            option.value = index;
-                            option.textContent = `${size.label} · ${size.sqm}m²`;
-                            sizeSelect.appendChild(option);
-                        });
-
-                        pricePanel?.classList.add('hidden');
-                        markAddButtonDisabled(true);
-                    });
-                });
-
-                sizeSelect.addEventListener('change', () => {
-                    const index = sizeSelect.value;
-
-                    if (index === '') {
-                        selectedSize = null;
-                        pricePanel?.classList.add('hidden');
-                        markAddButtonDisabled(true);
-                        return;
-                    }
-
-                    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-                    selectedSize = sizes[index];
-
-                    if (priceText) {
-                        priceText.textContent = money(selectedSize?.price || 0);
-                    }
-
-                    if (regularText) {
-                        regularText.textContent = money(selectedSize?.regular || 0);
-                    }
-
-                    pricePanel?.classList.remove('hidden');
-                    markAddButtonDisabled(false);
-                });
-
-                addQuoteButton.addEventListener('click', () => {
-                    if (!selectedColour || !selectedSize) {
-                        return;
-                    }
-
-                    addToQuote(product, {
-                        colour: selectedColour,
-                        size_label: selectedSize.label,
-                        sqm: selectedSize.sqm,
-                        price: selectedSize.price,
-                        regular: selectedSize.regular,
-                    });
-
-                    const originalText = addQuoteButton.textContent;
-
-                    addQuoteButton.textContent = 'Added to quote';
-
-                    setTimeout(() => {
-                        addQuoteButton.textContent = originalText || 'Add to quote';
-                    }, 1200);
-                });
-            }
+                setTimeout(() => {
+                    addQuoteButton.textContent = originalText || 'Add to quote';
+                }, 1200);
+            });
         });
     }
 
-    initVariantProductCards();
 
+    initTypeOnlyProductCards();
     document.querySelectorAll('[data-add-quote]').forEach((button) => {
         if (button.dataset.jsBound === '1') {
             return;
@@ -1020,6 +1280,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI Panel
+    |--------------------------------------------------------------------------
+    */
+
     const aiPanel = document.querySelector('[data-ai-panel]');
 
     document.querySelectorAll('[data-open-ai]').forEach((button) => {
@@ -1036,6 +1302,12 @@ document.addEventListener('DOMContentLoaded', () => {
             aiPanel?.classList.remove('is-open');
         });
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product Gallery + Zoom
+    |--------------------------------------------------------------------------
+    */
 
     function initGalleryAndZoom() {
         const mainImage = document.querySelector('[data-main-image]');
@@ -1079,6 +1351,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initGalleryAndZoom();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Measure Quote Multi-step Form
+    |--------------------------------------------------------------------------
+    */
 
     function initMeasureQuoteForm() {
         const form = document.getElementById('measureQuoteForm');
@@ -1185,6 +1463,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initMeasureQuoteForm();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Escape Key
+    |--------------------------------------------------------------------------
+    */
 
     document.addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') {

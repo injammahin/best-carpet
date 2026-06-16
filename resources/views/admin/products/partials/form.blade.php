@@ -100,7 +100,7 @@
             </div>
         </div>
 
-        <div class="clean-card bg-white p-6">
+        {{-- <div class="clean-card bg-white p-6">
             <p class="section-label mb-2">Colours</p>
             <h2 class="text-2xl text-mega-black">Range Colours</h2>
             <p class="mt-2 text-sm text-mega-muted">
@@ -180,7 +180,7 @@
             <button type="button" id="addColour" class="btn-light mt-4">
                 Add Colour +
             </button>
-        </div>
+        </div> --}}
 
         <div class="clean-card bg-white p-6">
             <p class="section-label mb-2">Pricing</p>
@@ -331,11 +331,11 @@
             <input type="text" name="room" value="{{ old('room', $product->room) }}" class="input-clean" placeholder="Bedroom, Lounge, Hallway">
         </div>
 
-        <div class="clean-card bg-white p-6">
+        {{-- <div class="clean-card bg-white p-6">
             <p class="section-label mb-2">Features</p>
 
             <textarea name="features" rows="6" class="input-clean" placeholder="One feature per line">{{ old('features', implode("\n", $product->features ?: [])) }}</textarea>
-        </div>
+        </div> --}}
 
         <div class="clean-card bg-white p-6">
             <label class="mq-check">

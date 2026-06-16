@@ -120,8 +120,8 @@
 
 .mega-logo-card {
     display: flex;
-    height: 56px;
-    width: 120px;
+    height: 70px;
+    width: 135px;
     align-items: center;
     justify-content: center;
     /* border: 1px solid rgba(232, 225, 218, 0.9);
@@ -585,8 +585,8 @@
     }
 
     .mega-logo-card {
-        width: 108px;
-        height: 54px;
+        width: 130px;
+        height: 80px;
     }
 
     .mega-header.is-compact .mega-topbar {
@@ -2047,4 +2047,41 @@ body {
     .premium-hero-controls {
         bottom: 18px;
     }
+}
+
+/* Type-only product options */
+
+.type-choice {
+    display: flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid #e8e1da;
+    background: #ffffff;
+    color: #070707;
+    padding: 11px 13px;
+    text-align: left;
+    transition: 180ms ease;
+    border-radius: 7px;
+}
+
+.type-choice span {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.type-choice strong {
+    flex: 0 0 auto;
+    color: #ff5a00;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.type-choice:hover,
+.type-choice.is-active {
+    border-color: rgba(255, 90, 0, 0.55);
+    background: #fff8f4;
+    box-shadow: 0 0 0 4px rgba(255, 90, 0, 0.09);
 }

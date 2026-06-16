@@ -6,15 +6,6 @@
 @section('content')
 
     @php
-        $fullDescription = trim((string) ($product['description'] ?? ''));
-        $shortDescription = trim((string) ($product['short'] ?? ''));
-
-        if ($shortDescription === '') {
-            $shortDescription = \Illuminate\Support\Str::limit($fullDescription, 190);
-        }
-
-        $descriptionPreview = \Illuminate\Support\Str::limit($fullDescription, 520);
-
         $gallery = $product['gallery'] ?? [];
 
         if (!count($gallery)) {
@@ -24,9 +15,159 @@
         }
 
         $categoryBackUrl = route('frontend.product.show', $product['category_slug']);
+
+        $onlyLabelMap = [
+            'carpet' => 'Carpet Only',
+            'timber' => 'Timber Only',
+            'hybrid-flooring' => 'Hybrid Flooring Only',
+            'laminate' => 'Laminate Only',
+            'vinyl' => 'Vinyl Only',
+            'rugs' => 'Rug Only',
+        ];
+
+        $onlyLabel = $onlyLabelMap[$product['category_slug'] ?? ''] ?? (($product['category'] ?? 'Product') . ' Only');
+
+        $quoteData = [
+            'id' => $product['id'] ?? $product['slug'],
+            'name' => $product['name'],
+            'category' => $product['category'],
+            'slug' => $product['slug'],
+            'image' => $product['image'],
+            'sizes' => $product['sizes'] ?? [],
+        ];
     @endphp
 
-    <section class="bg-white py-12 md:py-16">
+    <style>
+        .product-detail-main-section {
+            padding-top: 48px;
+            padding-bottom: 26px;
+        }
+
+        .detail-gallery-main {
+            height: 560px;
+        }
+
+        .detail-gallery-main img {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .detail-price-card {
+            border-radius: 7px;
+            background: #f4eee7;
+            padding: 18px;
+        }
+
+        .detail-price-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            gap: 12px;
+        }
+
+        .detail-main-price {
+            color: #070707;
+            font-size: 38px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.06em;
+        }
+
+        .detail-main-price span {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+
+        .dynamic-only-badge {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #eadfd6;
+            border-radius: 999px;
+            background: #ffffff;
+            padding: 9px 13px;
+            color: #ff5a00;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            line-height: 1;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .detail-price-panel strong {
+            color: #070707;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+        }
+
+        .related-products-section {
+            padding-top: 26px;
+            padding-bottom: 56px;
+        }
+
+        .related-product-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .related-product-card-image {
+            height: 224px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .related-product-card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .related-product-title {
+            min-height: 68px;
+        }
+
+        .related-product-description {
+            min-height: 52px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .related-product-link {
+            margin-top: auto;
+            padding-top: 18px;
+        }
+
+        @media (max-width: 1023px) {
+            .detail-gallery-main {
+                height: 440px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .product-detail-main-section {
+                padding-top: 34px;
+                padding-bottom: 18px;
+            }
+
+            .detail-gallery-main {
+                height: 360px;
+            }
+
+            .detail-main-price {
+                font-size: 32px;
+            }
+        }
+    </style>
+
+    <section class="bg-white product-detail-main-section">
         <div class="site-container">
             <div class="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
                 <div class="max-w-4xl">
@@ -37,18 +178,6 @@
                     <h1 class="section-title-premium max-w-4xl">
                         {{ $product['name'] }}
                     </h1>
-
-                    <p class="section-lead max-w-3xl">
-                        {{ $shortDescription }}
-                    </p>
-
-                    @if($fullDescription)
-                        <button type="button" data-open-product-description
-                            class="mt-5 inline-flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.16em] text-mega-orange transition hover:text-mega-black">
-                            Read full product details
-                            <span>→</span>
-                        </button>
-                    @endif
                 </div>
 
                 <a href="{{ $categoryBackUrl }}" class="btn-light w-fit">
@@ -56,9 +185,9 @@
                 </a>
             </div>
 
-            <div class="grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
+            <div class="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
                 <div>
-                    <div class="product-gallery-main !rounded-[7px]" data-zoom-wrap>
+                    <div class="product-gallery-main detail-gallery-main !rounded-[7px]" data-zoom-wrap>
                         <img src="{{ $gallery[0] }}" alt="{{ $product['name'] }}" data-main-image>
 
                         <div class="product-gallery-badge">
@@ -77,7 +206,8 @@
                     @endif
                 </div>
 
-                <aside class="product-detail-card" data-product-card data-product='@json($product)'>
+                <aside class="product-detail-card" data-product-card
+                    data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'>
                     <div class="mb-5 flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-extrabold uppercase tracking-[0.24em] text-mega-orange">
@@ -87,10 +217,6 @@
                             <h2 class="mt-3 text-2xl font-bold leading-tight tracking-[-0.05em] text-mega-black">
                                 {{ $product['name'] }}
                             </h2>
-
-                            <p class="mt-3 text-sm font-semibold leading-6 text-mega-muted">
-                                {{ $shortDescription }}
-                            </p>
                         </div>
 
                         <button type="button" class="wishlist-float static" data-product-wishlist aria-label="Save product">
@@ -101,49 +227,20 @@
                         </button>
                     </div>
 
-                    <div class="rounded-[7px] bg-mega-cream p-4">
-                        <div class="flex items-end justify-between gap-4">
-                            <div>
-                                <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-mega-muted">
-                                    From
-                                </p>
+                    <div class="detail-price-card">
+                        <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-mega-muted">
+                            From
+                        </p>
 
-                                <p class="mt-1 text-2xl font-light text-mega-black">
-                                    ${{ number_format((float) ($product['price_from'] ?? 0), 0) }}
-                                    <span class="text-base">/{{ $product['unit'] ?? 'm²' }}</span>
-                                </p>
-                            </div>
-
-                            <div class="text-right">
-                                <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-mega-muted">
-                                    Rating
-                                </p>
-
-                                <p class="mt-1 text-xl font-extrabold text-mega-orange">
-                                    ★ {{ $product['rating'] ?? '4.8' }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6">
-                        <div class="mb-3 flex items-center justify-between">
-                            <p class="text-base font-extrabold text-mega-black">
-                                Colour
+                        <div class="detail-price-row mt-2">
+                            <p class="detail-main-price">
+                                ${{ number_format((float) ($product['price_from'] ?? 0), 0) }}
+                                <span>/{{ $product['unit'] ?? 'm²' }}</span>
                             </p>
 
-                            <p class="text-sm font-bold text-mega-muted" data-selected-colour-text>
-                                Select colour
-                            </p>
-                        </div>
-
-                        <div class="flex flex-wrap gap-3">
-                            @foreach(($product['colours'] ?? []) as $colour)
-                                <button type="button" class="product-colour-btn size-large" data-colour-button
-                                    data-colour-name="{{ $colour['name'] }}" title="{{ $colour['name'] }}">
-                                    <span style="background: {{ $colour['swatch'] }}"></span>
-                                </button>
-                            @endforeach
+                            <span class="dynamic-only-badge">
+                                {{ $onlyLabel }}
+                            </span>
                         </div>
                     </div>
 
@@ -152,20 +249,22 @@
                             {{ ($product['category_slug'] ?? '') === 'rugs' ? 'Rug size' : 'Area size' }}
                         </label>
 
-                        <select class="product-size-select" data-size-select disabled>
-                            <option value="">Choose colour first...</option>
+                        <select class="product-size-select" data-size-select>
+                            <option value="">Choose a size for rough estimate...</option>
 
                             @foreach(($product['sizes'] ?? []) as $index => $size)
-                                <option value="{{ $index }}">
-                                    {{ $size['label'] }} · {{ $size['sqm'] }}m²
+                                <option value="{{ $index }}" data-label="{{ $size['label'] ?? '' }}"
+                                    data-sqm="{{ $size['sqm'] ?? '' }}" data-price="{{ $size['price'] ?? 0 }}"
+                                    data-regular-price="{{ $size['regular_price'] ?? ($size['regular'] ?? 0) }}">
+                                    {{ $size['label'] ?? 'Size' }} · {{ $size['sqm'] ?? 0 }}m²
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="product-price-panel hidden" data-price-panel>
+                    <div class="product-price-panel detail-price-panel hidden" data-price-panel>
                         <div>
-                            <p>Estimated price</p>
+                            <p>Rough estimate</p>
                             <strong data-price-text>$0.00</strong>
                         </div>
 
@@ -184,158 +283,13 @@
                             Book free measure
                         </a>
                     </div>
-
-                    @if(!empty($product['features']))
-                        <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                            @foreach($product['features'] as $feature)
-                                <div
-                                    class="rounded-[7px] border border-mega-line bg-mega-soft p-4 text-sm font-bold text-mega-text">
-                                    {{ $feature }}
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
                 </aside>
             </div>
         </div>
     </section>
 
-    @if($fullDescription)
-        <section class="bg-mega-cream py-12 md:py-16">
-            <div class="site-container">
-                <div class="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-                    <div>
-                        <p class="section-kicker">
-                            Product information
-                        </p>
-
-                        <h2 class="section-title-premium max-w-xl">
-                            Details, texture, care and material notes.
-                        </h2>
-
-                        <p class="section-lead">
-                            We moved the long description here so the top of the product page stays clean and premium.
-                        </p>
-
-                        <button type="button" data-open-product-description class="btn-primary mt-6">
-                            Read full details
-                            <span>→</span>
-                        </button>
-                    </div>
-
-                    <div class="clean-card relative overflow-hidden bg-white p-7 md:p-8 !rounded-[7px]">
-                        <div
-                            class="absolute right-0 top-0 h-32 w-32 translate-x-10 -translate-y-10 rounded-full bg-mega-orange/10">
-                        </div>
-
-                        <div class="relative">
-                            <div class="mb-5 flex items-center gap-3">
-                                <div
-                                    class="flex h-12 w-12 items-center justify-center bg-mega-orange/10 text-mega-orange radius-7">
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="1.6">
-                                        <path d="M5 4h14v16H5z" />
-                                        <path d="M8 8h8M8 12h8M8 16h5" />
-                                    </svg>
-                                </div>
-
-                                <div>
-                                    <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-mega-orange">
-                                        Full description preview
-                                    </p>
-
-                                    <h3 class="mt-1 text-2xl font-black text-mega-black">
-                                        {{ $product['name'] }}
-                                    </h3>
-                                </div>
-                            </div>
-
-                            <p class="text-lg font-medium leading-9 text-mega-muted">
-                                {{ $descriptionPreview }}
-                            </p>
-
-                            @if(strlen($fullDescription) > 520)
-                                <div
-                                    class="mt-6 flex flex-col gap-3 border-t border-mega-line pt-5 sm:flex-row sm:items-center sm:justify-between">
-                                    <p class="text-sm font-semibold text-mega-muted">
-                                        Full text available in a clean reading modal.
-                                    </p>
-
-                                    <button type="button" data-open-product-description
-                                        class="font-extrabold text-mega-orange hover:text-mega-black">
-                                        Continue reading →
-                                    </button>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div data-product-description-modal class="fixed inset-0 z-[120] hidden">
-            <div data-close-product-description class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-
-            <div
-                class="absolute left-1/2 top-1/2 flex max-h-[88vh] w-[calc(100vw-32px)] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-mega-line bg-white shadow-2xl radius-7">
-                <div class="shrink-0 border-b border-mega-line bg-mega-cream p-5 md:p-6">
-                    <div class="flex items-start justify-between gap-5">
-                        <div class="min-w-0">
-                            <p class="section-kicker">
-                                Product details
-                            </p>
-
-                            <h2 class="mt-2 text-3xl font-black leading-tight text-mega-black md:text-4xl">
-                                {{ $product['name'] }}
-                            </h2>
-
-                            <p class="mt-3 max-w-2xl text-base font-semibold leading-7 text-mega-muted">
-                                {{ $shortDescription }}
-                            </p>
-                        </div>
-
-                        <button type="button" data-close-product-description
-                            class="grid h-11 w-11 shrink-0 place-items-center bg-white text-2xl text-mega-black shadow-sm transition hover:bg-mega-orange hover:text-white radius-7">
-                            ×
-                        </button>
-                    </div>
-                </div>
-
-                <div class="min-h-0 flex-1 overflow-y-auto bg-white p-5 md:p-6">
-                    <div class="max-w-none">
-                        @foreach(preg_split('/\r\n|\r|\n/', $fullDescription) as $paragraph)
-                            @if(trim($paragraph) !== '')
-                                <p class="mb-5 text-lg font-medium leading-9 text-mega-muted">
-                                    {{ trim($paragraph) }}
-                                </p>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="shrink-0 border-t border-mega-line bg-white p-5">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <p class="text-sm font-semibold text-mega-muted">
-                            Need help choosing this product?
-                        </p>
-
-                        <div class="flex flex-col gap-3 sm:flex-row">
-                            <a href="{{ route('frontend.quote') }}" class="btn-primary justify-center">
-                                Book free measure
-                            </a>
-
-                            <button type="button" data-close-product-description class="btn-light justify-center">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
     @if(count($relatedProducts))
-        <section class="bg-white py-12 md:py-16">
+        <section class="bg-white related-products-section">
             <div class="site-container">
                 <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                     <div>
@@ -353,28 +307,28 @@
                     </a>
                 </div>
 
-                <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                <div class="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
                     @foreach($relatedProducts as $related)
-                        <article class="premium-product-card">
+                        <article class="premium-product-card related-product-card">
                             <a href="{{ route('frontend.product.show', $related['slug']) }}">
-                                <img src="{{ $related['image'] }}" alt="{{ $related['name'] }}" class="h-56 w-full object-cover">
+                                <img src="{{ $related['image'] }}" alt="{{ $related['name'] }}" class="related-product-card-image">
                             </a>
 
-                            <div class="p-5">
+                            <div class="related-product-card-body">
                                 <p class="text-xs font-extrabold uppercase tracking-[0.24em] text-mega-orange">
                                     {{ $related['badge'] }}
                                 </p>
 
-                                <h3 class="mt-3 text-2xl font-extrabold leading-tight text-mega-black">
+                                <h3 class="related-product-title mt-3 text-2xl font-extrabold leading-tight text-mega-black">
                                     {{ $related['name'] }}
                                 </h3>
 
-                                <p class="mt-2 text-sm font-semibold leading-6 text-mega-muted">
+                                <p class="related-product-description mt-2 text-sm font-semibold leading-6 text-mega-muted">
                                     {{ $related['short'] }}
                                 </p>
 
                                 <a href="{{ route('frontend.product.show', $related['slug']) }}"
-                                    class="mt-4 inline-flex font-extrabold text-mega-orange">
+                                    class="related-product-link inline-flex font-extrabold text-mega-orange">
                                     Product details →
                                 </a>
                             </div>
@@ -384,42 +338,5 @@
             </div>
         </section>
     @endif
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.querySelector('[data-product-description-modal]');
-            const openButtons = document.querySelectorAll('[data-open-product-description]');
-            const closeButtons = document.querySelectorAll('[data-close-product-description]');
-
-            openButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    if (!modal) {
-                        return;
-                    }
-
-                    modal.classList.remove('hidden');
-                    document.body.classList.add('overflow-hidden');
-                });
-            });
-
-            closeButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    if (!modal) {
-                        return;
-                    }
-
-                    modal.classList.add('hidden');
-                    document.body.classList.remove('overflow-hidden');
-                });
-            });
-
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-                    modal.classList.add('hidden');
-                    document.body.classList.remove('overflow-hidden');
-                }
-            });
-        });
-    </script>
 
 @endsection

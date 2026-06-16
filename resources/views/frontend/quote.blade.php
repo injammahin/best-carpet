@@ -348,7 +348,7 @@
                                 @php $oldDays = old('suitable_days', []); @endphp
 
                                 <div class="grid gap-3 sm:grid-cols-2" data-required-group="suitable_days">
-                                    @foreach(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
+                                    @foreach(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] as $day)
                                         <label class="mq-check">
                                             <input type="checkbox" name="suitable_days[]" value="{{ $day }}"
                                                 @checked(in_array($day, $oldDays))>
@@ -361,25 +361,74 @@
                             </div>
 
                             <div>
-                                <label class="mq-label">Find Your Local Store <span class="mq-required">*</span></label>
+                                <label class="mq-label">
+                                    How did you hear about us? <span class="mq-required">*</span>
+                                </label>
 
-                                <div class="relative">
-                                    <input type="text" name="local_store" class="mq-input pr-12"
-                                        value="{{ old('local_store', 'Mega Carpets Melbourne') }}" required>
-                                    <button type="button"
-                                        class="absolute right-4 top-1/2 -translate-y-1/2 text-2xl text-mega-text/70"
-                                        onclick="this.previousElementSibling.value=''">
-                                        ×
-                                    </button>
-                                </div>
+                                @php
+                                    $hearAboutOptions = [
+                                        'Google',
+                                        'Facebook',
+                                        'Instagram',
+                                        'Previous Customer',
+                                        'Word of Mouth',
+                                        'Other',
+                                    ];
+                                @endphp
 
-                                @error('local_store') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                <select name="local_store" class="mq-input" required>
+                                    <option value="" disabled @selected(!old('local_store'))>
+                                        Select an option
+                                    </option>
+
+                                    @foreach($hearAboutOptions as $option)
+                                        <option value="{{ $option }}" @selected(old('local_store') === $option)>
+                                            {{ $option }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                @error('local_store')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div>
+                                <div class="mb-5 hidden" data-selected-products-wrap>
+                                    <div class="rounded-[14px] border border-orange-200 bg-orange-50/40 p-5">
+                                        <div class="mb-4 flex items-center justify-between gap-4">
+                                            <div>
+                                                <p class="text-xs font-black uppercase tracking-[0.22em] text-mega-orange">
+                                                    Selected products
+                                                </p>
+
+                                                <h3 class="mt-1 text-xl font-black text-mega-black">
+                                                    Products added to quote
+                                                </h3>
+                                            </div>
+
+                                            <span data-selected-products-count
+                                                class="rounded-full bg-mega-orange px-3 py-1 text-xs font-black text-white">
+                                                0 item
+                                            </span>
+                                        </div>
+
+                                        <div class="space-y-3" data-selected-products-preview></div>
+
+                                        <p
+                                            class="mt-4 rounded-[7px] bg-white px-4 py-3 text-xs font-semibold leading-5 text-mega-muted">
+                                            Final quote may change after measurement, installation requirements,
+                                            preparation, underlay and product availability.
+                                        </p>
+                                    </div>
+                                </div>
+
                                 <label class="mq-label">Additional Comments</label>
-                                <textarea name="comments" rows="5"
-                                    class="mq-input min-h-[130px] resize-none">{{ old('comments') }}</textarea>
+
+                                <textarea data-customer-note rows="5" class="mq-input min-h-[130px] resize-none"
+                                    placeholder="Tell us about your project, preferred products, budget, timeline or any special requirements...">{{ old('comments') }}</textarea>
+
+                                <input type="hidden" name="comments" data-quote-message value="{{ old('comments') }}">
                             </div>
 
                             <p class="text-sm font-medium text-mega-text">
