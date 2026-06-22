@@ -585,7 +585,7 @@
         </script>
     </section>
 
-    <section id="shop-room" class="bg-[#f7f3ed] py-20">
+    {{-- <section id="shop-room" class="bg-[#f7f3ed] py-20">
         <div class="site-container grid gap-10 lg:grid-cols-[.95fr_1.05fr] lg:items-center">
             <div>
                 <p class="section-kicker">{{ $shopRoomKicker }}</p>
@@ -596,26 +596,26 @@
 
                 <div class="mt-8 space-y-3">
                     @foreach($roomItems as $item)
-                        <div class="grid grid-cols-[96px_1fr_auto] items-center overflow-hidden bg-white shadow-sm radius-7">
-                            <div class="h-24" style="background-color: {{ $item['color'] }}"></div>
+                    <div class="grid grid-cols-[96px_1fr_auto] items-center overflow-hidden bg-white shadow-sm radius-7">
+                        <div class="h-24" style="background-color: {{ $item['color'] }}"></div>
 
-                            <div class="px-5">
-                                <p class="text-sm font-medium text-mega-orange">{{ $item['type'] }}</p>
-                                <h3 class="mt-1 text-xl font-semibold uppercase tracking-tight text-mega-black">
-                                    {{ $item['name'] }}
-                                </h3>
-                                <p class="text-sm font-normal text-mega-muted">Colour curated for retreat-style interiors</p>
-                            </div>
-
-                            <button type="button"
-                                class="mr-4 grid h-10 w-10 place-items-center hover:bg-mega-cream hover:text-mega-orange radius-7"
-                                aria-label="Save room product">
-                                <svg class="h-5 w-5 thin-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path
-                                        d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
-                                </svg>
-                            </button>
+                        <div class="px-5">
+                            <p class="text-sm font-medium text-mega-orange">{{ $item['type'] }}</p>
+                            <h3 class="mt-1 text-xl font-semibold uppercase tracking-tight text-mega-black">
+                                {{ $item['name'] }}
+                            </h3>
+                            <p class="text-sm font-normal text-mega-muted">Colour curated for retreat-style interiors</p>
                         </div>
+
+                        <button type="button"
+                            class="mr-4 grid h-10 w-10 place-items-center hover:bg-mega-cream hover:text-mega-orange radius-7"
+                            aria-label="Save room product">
+                            <svg class="h-5 w-5 thin-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path
+                                    d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
+                            </svg>
+                        </button>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -639,7 +639,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     <section id="services" class="bg-mega-black py-20 text-white">
         <div class="site-container">

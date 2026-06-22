@@ -18,7 +18,9 @@
                     </h1>
 
                     <p class="section-lead">
-                        {{ $activeCategory['short'] ?? 'Choose a size in square metres, view the rough estimate, save favourites and request a quote.' }}
+                        {{ ($activeCategorySlug ?? '') === 'rugs'
+        ? 'Browse rug products with one fixed product price.'
+        : 'Choose a size in square metres and the rough estimate will calculate automatically.' }}
                     </p>
                 </div>
 
@@ -71,25 +73,27 @@
                                 <input type="hidden" name="q" value="{{ $search }}">
                             @endif
 
-                            <div class="filter-block">
-                                <details open>
-                                    <summary>
-                                        {{ $activeCategorySlug === 'rugs' ? 'Rug Size' : 'Size / Area' }}
-                                        <span>⌃</span>
-                                    </summary>
+                            @if(($activeCategorySlug ?? '') !== 'rugs')
+                                <div class="filter-block">
+                                    <details open>
+                                        <summary>
+                                            Size / Area
+                                            <span>⌃</span>
+                                        </summary>
 
-                                    <div class="filter-options">
-                                        @foreach($filterOptions['size_group'] as $option)
-                                            <label class="filter-check">
-                                                <input type="checkbox" name="size_group[]" value="{{ $option['label'] }}"
-                                                    @checked(in_array($option['label'], $activeFilters['size_group'], true))>
-                                                <span>{{ $option['label'] }}</span>
-                                                <em>({{ $option['count'] }})</em>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                </details>
-                            </div>
+                                        <div class="filter-options">
+                                            @foreach($filterOptions['size_group'] as $option)
+                                                <label class="filter-check">
+                                                    <input type="checkbox" name="size_group[]" value="{{ $option['label'] }}"
+                                                        @checked(in_array($option['label'], $activeFilters['size_group'], true))>
+                                                    <span>{{ $option['label'] }}</span>
+                                                    <em>({{ $option['count'] }})</em>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </details>
+                                </div>
+                            @endif
 
                             <div class="filter-block">
                                 <details open>
@@ -142,11 +146,6 @@
                     <div class="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
                         <div
                             class="inline-flex w-fit items-center gap-3 bg-mega-cream px-4 py-3 text-sm font-extrabold text-mega-black radius-7">
-                            <svg class="h-4 w-4 text-mega-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.7">
-                                <path d="M4 7h16M7 12h10M10 17h4" />
-                            </svg>
-
                             {{ count($products) }} products showing
                         </div>
 
@@ -160,6 +159,8 @@
                         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                             @foreach($products as $product)
                                 @php
+                                    $isRug = ($product['is_rug'] ?? false) || (($product['category_slug'] ?? '') === 'rugs');
+
                                     $quoteData = [
                                         'id' => $product['id'] ?? $product['slug'],
                                         'name' => $product['name'],
@@ -167,6 +168,9 @@
                                         'slug' => $product['slug'],
                                         'image' => $product['image'],
                                         'sizes' => $product['sizes'] ?? [],
+                                        'is_rug' => $isRug,
+                                        'fixed_price' => $product['fixed_price'] ?? $product['price_from'],
+                                        'price_mode' => $isRug ? 'fixed' : 'per_sqm',
                                     ];
                                 @endphp
 
@@ -207,38 +211,42 @@
                                             </a>
                                         </h2>
 
-                                        <div class="mt-5">
-                                            <label class="mb-2 block text-sm font-extrabold text-mega-black">
-                                                {{ ($product['category_slug'] ?? '') === 'rugs' ? 'Rug size' : 'Area size' }}
-                                            </label>
+                                        @if($isRug)
+                                            <div class="product-price-panel mt-5" data-price-panel>
+                                                <div>
+                                                    <p>Fixed rug price</p>
+                                                    <strong
+                                                        data-price-text>${{ number_format((float) ($product['fixed_price'] ?? $product['price_from']), 2) }}</strong>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="mt-5">
+                                                <label class="mb-2 block text-sm font-extrabold text-mega-black">
+                                                    Area size
+                                                </label>
 
-                                            <select class="product-size-select" data-size-select>
-                                                <option value="">Choose a size for rough estimate...</option>
+                                                <select class="product-size-select" data-size-select>
+                                                    <option value="">Choose a size for rough estimate...</option>
 
-                                                @foreach(($product['sizes'] ?? []) as $index => $size)
-                                                    <option value="{{ $index }}" data-label="{{ $size['label'] ?? '' }}"
-                                                        data-sqm="{{ $size['sqm'] ?? '' }}" data-price="{{ $size['price'] ?? 0 }}"
-                                                        data-regular-price="{{ $size['regular_price'] ?? ($size['regular'] ?? 0) }}">
-                                                        {{ $size['label'] ?? 'Size' }} · {{ $size['sqm'] ?? 0 }}m²
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div class="product-price-panel hidden" data-price-panel>
-                                            <div>
-                                                <p>Rough estimate</p>
-                                                <strong data-price-text>$0.00</strong>
+                                                    @foreach(($product['sizes'] ?? []) as $index => $size)
+                                                        <option value="{{ $index }}" data-label="{{ $size['label'] ?? '' }}"
+                                                            data-sqm="{{ $size['sqm'] ?? '' }}" data-price="{{ $size['price'] ?? 0 }}">
+                                                            {{ $size['label'] ?? 'Size' }} · {{ $size['sqm'] ?? 0 }}m²
+                                                        </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
 
-                                            <div>
-                                                <p>Regular</p>
-                                                <del data-regular-text>$0.00</del>
+                                            <div class="product-price-panel hidden" data-price-panel>
+                                                <div>
+                                                    <p>Rough estimate</p>
+                                                    <strong data-price-text>$0.00</strong>
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endif
 
                                         <div class="mt-5 grid grid-cols-[1fr_52px] gap-3">
-                                            <button type="button" class="product-quote-btn" data-add-quote disabled>
+                                            <button type="button" class="product-quote-btn" data-add-quote {{ $isRug ? '' : 'disabled' }}>
                                                 Add to quote
                                             </button>
 

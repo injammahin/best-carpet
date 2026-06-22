@@ -6,13 +6,35 @@
 @section('content')
 
     @php
-        $gallery = $product['gallery'] ?? [];
+        $isRug = ($product['is_rug'] ?? false) || (($product['category_slug'] ?? '') === 'rugs');
 
-        if (!count($gallery)) {
-            $gallery = [
-                $product['image'] ?? 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=85',
-            ];
+        $galleryItems = collect($product['gallery'] ?? [])
+            ->map(function ($item) {
+                if (is_array($item)) {
+                    return [
+                        'image' => $item['image'] ?? '',
+                        'colour_name' => $item['colour_name'] ?? 'Gallery image',
+                    ];
+                }
+
+                return [
+                    'image' => $item,
+                    'colour_name' => 'Gallery image',
+                ];
+            })
+            ->filter(fn ($item) => $item['image'])
+            ->values();
+
+        if (!$galleryItems->count()) {
+            $galleryItems = collect([
+                [
+                    'image' => $product['image'],
+                    'colour_name' => 'Main image',
+                ],
+            ]);
         }
+
+        $firstGallery = $galleryItems->first();
 
         $categoryBackUrl = route('frontend.product.show', $product['category_slug']);
 
@@ -27,6 +49,13 @@
 
         $onlyLabel = $onlyLabelMap[$product['category_slug'] ?? ''] ?? (($product['category'] ?? 'Product') . ' Only');
 
+        $descriptionText = trim((string) ($product['description'] ?? ''));
+        $shortText = trim((string) ($product['short'] ?? ''));
+
+        if ($descriptionText === '') {
+            $descriptionText = $shortText;
+        }
+
         $quoteData = [
             'id' => $product['id'] ?? $product['slug'],
             'name' => $product['name'],
@@ -34,6 +63,9 @@
             'slug' => $product['slug'],
             'image' => $product['image'],
             'sizes' => $product['sizes'] ?? [],
+            'is_rug' => $isRug,
+            'fixed_price' => $product['fixed_price'] ?? $product['price_from'],
+            'price_mode' => $isRug ? 'fixed' : 'per_sqm',
         ];
     @endphp
 
@@ -57,13 +89,6 @@
             border-radius: 7px;
             background: #f4eee7;
             padding: 18px;
-        }
-
-        .detail-price-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: end;
-            gap: 12px;
         }
 
         .detail-main-price {
@@ -101,6 +126,135 @@
             font-size: 28px;
             font-weight: 900;
             letter-spacing: -0.04em;
+        }
+
+        .gallery-colour-label {
+            margin-top: 14px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            background: #fff3ec;
+            padding: 8px 12px;
+            color: #ff5a00;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .product-description-section {
+            padding-top: 18px;
+            padding-bottom: 28px;
+        }
+
+        .product-description-card {
+            border: 1px solid #eadfd6;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 7px;
+            box-shadow: 0 22px 60px rgba(7, 7, 7, 0.06);
+        }
+
+        .product-description-preview {
+            margin-top: 18px;
+            color: #6f6873;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.9;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            white-space: pre-line;
+        }
+
+        .product-read-more-btn {
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #ff5a00;
+            color: #ffffff;
+            padding: 13px 18px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 900;
+            transition: 180ms ease;
+        }
+
+        .product-read-more-btn:hover {
+            background: #e84f00;
+            transform: translateY(-1px);
+        }
+
+        .product-description-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .product-description-modal.is-open {
+            display: flex;
+        }
+
+        .product-description-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(7, 7, 7, 0.62);
+            backdrop-filter: blur(10px);
+        }
+
+        .product-description-modal-card {
+            position: relative;
+            z-index: 2;
+            width: min(820px, 100%);
+            max-height: 88vh;
+            overflow-y: auto;
+            background: #ffffff;
+            border-radius: 7px;
+            box-shadow: 0 30px 90px rgba(7, 7, 7, 0.28);
+        }
+
+        .product-description-modal-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 1px solid #eadfd6;
+            padding: 26px;
+        }
+
+        .product-description-modal-body {
+            padding: 26px;
+            color: #5f5964;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.9;
+            white-space: pre-line;
+        }
+
+        .product-description-modal-close {
+            display: grid;
+            height: 42px;
+            width: 42px;
+            flex: 0 0 auto;
+            place-items: center;
+            border: 1px solid #eadfd6;
+            background: #ffffff;
+            color: #070707;
+            border-radius: 7px;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .product-description-modal-close:hover {
+            border-color: #ff5a00;
+            color: #ff5a00;
         }
 
         .related-products-section {
@@ -164,6 +318,15 @@
             .detail-main-price {
                 font-size: 32px;
             }
+
+            .product-description-card {
+                padding: 22px;
+            }
+
+            .product-description-modal-head,
+            .product-description-modal-body {
+                padding: 20px;
+            }
         }
     </style>
 
@@ -188,26 +351,39 @@
             <div class="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
                 <div>
                     <div class="product-gallery-main detail-gallery-main !rounded-[7px]" data-zoom-wrap>
-                        <img src="{{ $gallery[0] }}" alt="{{ $product['name'] }}" data-main-image>
+                        <img src="{{ $firstGallery['image'] }}" alt="{{ $product['name'] }}" data-main-image>
 
                         <div class="product-gallery-badge">
                             Hover image to zoom
                         </div>
                     </div>
 
-                    @if(count($gallery) > 1)
+                    <div class="gallery-colour-label" data-gallery-colour-label>
+                        {{ $firstGallery['colour_name'] }}
+                    </div>
+
+                    @if($galleryItems->count() > 1)
                         <div class="mt-4 grid grid-cols-4 gap-3">
-                            @foreach($gallery as $image)
-                                <button type="button" class="product-thumb-btn" data-gallery-thumb data-image="{{ $image }}">
-                                    <img src="{{ $image }}" alt="{{ $product['name'] }} thumbnail">
+                            @foreach($galleryItems as $item)
+                                <button
+                                    type="button"
+                                    class="product-thumb-btn"
+                                    data-gallery-thumb
+                                    data-image="{{ $item['image'] }}"
+                                    data-colour-name="{{ $item['colour_name'] }}"
+                                >
+                                    <img src="{{ $item['image'] }}" alt="{{ $item['colour_name'] }}">
                                 </button>
                             @endforeach
                         </div>
                     @endif
                 </div>
 
-                <aside class="product-detail-card" data-product-card
-                    data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'>
+                <aside
+                    class="product-detail-card"
+                    data-product-card
+                    data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
+                >
                     <div class="mb-5 flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-extrabold uppercase tracking-[0.24em] text-mega-orange">
@@ -221,21 +397,20 @@
 
                         <button type="button" class="wishlist-float static" data-product-wishlist aria-label="Save product">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path
-                                    d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
+                                <path d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
                             </svg>
                         </button>
                     </div>
 
                     <div class="detail-price-card">
                         <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-mega-muted">
-                            From
+                            {{ $isRug ? 'Fixed price' : 'Price per m²' }}
                         </p>
 
-                        <div class="detail-price-row mt-2">
+                        <div class="mt-2 flex flex-wrap items-end gap-3">
                             <p class="detail-main-price">
-                                ${{ number_format((float) ($product['price_from'] ?? 0), 0) }}
-                                <span>/{{ $product['unit'] ?? 'm²' }}</span>
+                                ${{ number_format((float) ($product['price_from'] ?? 0), 2) }}
+                                <span>/{{ $isRug ? 'item' : 'm²' }}</span>
                             </p>
 
                             <span class="dynamic-only-badge">
@@ -244,38 +419,45 @@
                         </div>
                     </div>
 
-                    <div class="mt-6">
-                        <label class="mb-2 block text-base font-extrabold text-mega-black">
-                            {{ ($product['category_slug'] ?? '') === 'rugs' ? 'Rug size' : 'Area size' }}
-                        </label>
+                    @if($isRug)
+                        <div class="product-price-panel detail-price-panel mt-6" data-price-panel>
+                            <div>
+                                <p>Fixed rug price</p>
+                                <strong data-price-text>${{ number_format((float) ($product['fixed_price'] ?? $product['price_from']), 2) }}</strong>
+                            </div>
+                        </div>
+                    @else
+                        <div class="mt-6">
+                            <label class="mb-2 block text-base font-extrabold text-mega-black">
+                                Area size
+                            </label>
 
-                        <select class="product-size-select" data-size-select>
-                            <option value="">Choose a size for rough estimate...</option>
+                            <select class="product-size-select" data-size-select>
+                                <option value="">Choose a size for rough estimate...</option>
 
-                            @foreach(($product['sizes'] ?? []) as $index => $size)
-                                <option value="{{ $index }}" data-label="{{ $size['label'] ?? '' }}"
-                                    data-sqm="{{ $size['sqm'] ?? '' }}" data-price="{{ $size['price'] ?? 0 }}"
-                                    data-regular-price="{{ $size['regular_price'] ?? ($size['regular'] ?? 0) }}">
-                                    {{ $size['label'] ?? 'Size' }} · {{ $size['sqm'] ?? 0 }}m²
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="product-price-panel detail-price-panel hidden" data-price-panel>
-                        <div>
-                            <p>Rough estimate</p>
-                            <strong data-price-text>$0.00</strong>
+                                @foreach(($product['sizes'] ?? []) as $index => $size)
+                                    <option
+                                        value="{{ $index }}"
+                                        data-label="{{ $size['label'] ?? '' }}"
+                                        data-sqm="{{ $size['sqm'] ?? '' }}"
+                                        data-price="{{ $size['price'] ?? 0 }}"
+                                    >
+                                        {{ $size['label'] ?? 'Size' }} · {{ $size['sqm'] ?? 0 }}m²
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <div>
-                            <p>Regular</p>
-                            <del data-regular-text>$0.00</del>
+                        <div class="product-price-panel detail-price-panel hidden" data-price-panel>
+                            <div>
+                                <p>Rough estimate</p>
+                                <strong data-price-text>$0.00</strong>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                        <button type="button" class="product-quote-btn" data-add-quote disabled>
+                        <button type="button" class="product-quote-btn" data-add-quote {{ $isRug ? '' : 'disabled' }}>
                             Add to quote
                         </button>
 
@@ -287,6 +469,63 @@
             </div>
         </div>
     </section>
+
+    @if($descriptionText !== '')
+        <section class="bg-white product-description-section">
+            <div class="site-container">
+                <div class="product-description-card">
+                    <div class="grid gap-8 lg:grid-cols-[0.35fr_0.65fr]">
+                        <div>
+                            <p class="section-kicker">
+                                Product overview
+                            </p>
+
+                            <h2 class="mt-3 text-3xl font-black leading-tight tracking-[-0.05em] text-mega-black">
+                                About {{ $product['name'] }}
+                            </h2>
+                        </div>
+
+                        <div>
+                            <div class="product-description-preview">
+                                {{ $descriptionText }}
+                            </div>
+
+                            <button type="button" class="product-read-more-btn" data-open-description-modal>
+                                Read full description
+                                <span>→</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="product-description-modal" data-description-modal aria-hidden="true">
+            <div class="product-description-modal-backdrop" data-close-description-modal></div>
+
+            <div class="product-description-modal-card">
+                <div class="product-description-modal-head">
+                    <div>
+                        <p class="section-kicker">
+                            Product description
+                        </p>
+
+                        <h2 class="mt-2 text-3xl font-black leading-tight tracking-[-0.05em] text-mega-black">
+                            {{ $product['name'] }}
+                        </h2>
+                    </div>
+
+                    <button type="button" class="product-description-modal-close" data-close-description-modal aria-label="Close description">
+                        ×
+                    </button>
+                </div>
+
+                <div class="product-description-modal-body">
+                    {{ $descriptionText }}
+                </div>
+            </div>
+        </div>
+    @endif
 
     @if(count($relatedProducts))
         <section class="bg-white related-products-section">
@@ -327,8 +566,10 @@
                                     {{ $related['short'] }}
                                 </p>
 
-                                <a href="{{ route('frontend.product.show', $related['slug']) }}"
-                                    class="related-product-link inline-flex font-extrabold text-mega-orange">
+                                <a
+                                    href="{{ route('frontend.product.show', $related['slug']) }}"
+                                    class="related-product-link inline-flex font-extrabold text-mega-orange"
+                                >
                                     Product details →
                                 </a>
                             </div>
@@ -338,5 +579,45 @@
             </div>
         </section>
     @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.querySelector('[data-description-modal]');
+            const openButton = document.querySelector('[data-open-description-modal]');
+            const closeButtons = document.querySelectorAll('[data-close-description-modal]');
+
+            function openDescriptionModal() {
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDescriptionModal() {
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            openButton?.addEventListener('click', openDescriptionModal);
+
+            closeButtons.forEach(function (button) {
+                button.addEventListener('click', closeDescriptionModal);
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeDescriptionModal();
+                }
+            });
+        });
+    </script>
 
 @endsection

@@ -1,12 +1,12 @@
 <div class="fixed bottom-5 right-5 z-40 flex flex-col gap-3">
-    <button type="button" data-open-ai
+    {{-- <button type="button" data-open-ai
         class="grid h-14 w-14 place-items-center rounded-full border-4 border-white bg-mega-orange text-white shadow-soft transition hover:scale-105"
         aria-label="AI assistant">
         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2z" />
             <path d="M19 15l.9 3.1L23 19l-3.1.9L19 23l-.9-3.1L15 19l3.1-.9L19 15z" />
         </svg>
-    </button>
+    </button> --}}
 
     <button type="button" data-open-quote
         class="relative grid h-14 w-14 place-items-center rounded-full border-4 border-white bg-mega-black text-white shadow-soft transition hover:scale-105"

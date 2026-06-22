@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductCategory;
-use App\Models\ProductColour;
+use App\Models\ProductGalleryImage;
 use App\Models\ProductRange;
-use App\Models\ProductRangePrice;
 use App\Models\ProductSizeOption;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -58,34 +57,23 @@ class ProductRangeController extends Controller
     {
         $validated = $this->validateProduct($request);
 
+        $category = ProductCategory::findOrFail($validated['category_id']);
         $validated['slug'] = $this->uniqueSlug($validated['name']);
         $validated['is_active'] = $request->boolean('is_active');
-        $validated['gallery'] = [];
         $validated['features'] = $this->linesToArray($request->features);
+        $validated['gallery'] = [];
+        $validated['price_mode'] = $category->slug === 'rugs' ? 'fixed' : 'per_sqm';
+        $validated['selected_size_option_ids'] = $category->slug === 'rugs'
+            ? []
+            : array_values($request->input('selected_size_option_ids', []));
 
         if ($request->hasFile('main_image_file')) {
             $validated['main_image'] = $request->file('main_image_file')->store('products/main', 'public');
         }
 
-        $galleryImages = [];
-
-        if ($request->hasFile('gallery_images')) {
-            foreach ($request->file('gallery_images') as $image) {
-                if ($image) {
-                    $galleryImages[] = $image->store('products/gallery', 'public');
-                }
-            }
-        }
-
-        $validated['gallery'] = $galleryImages;
-
         $product = ProductRange::create($validated);
 
-        if ($this->requestHasColourRows($request)) {
-            $this->syncColours($product, $request);
-        }
-
-        $this->syncPrices($product, $request);
+        $this->syncGalleryImages($product, $request);
 
         return redirect()
             ->route('admin.products.edit', $product)
@@ -94,7 +82,7 @@ class ProductRangeController extends Controller
 
     public function edit(ProductRange $product): View
     {
-        $product->load(['colours', 'prices']);
+        $product->load(['category', 'subcategory', 'galleryImages']);
 
         return view('admin.products.edit', $this->formData($product));
     }
@@ -103,12 +91,18 @@ class ProductRangeController extends Controller
     {
         $validated = $this->validateProduct($request, $product);
 
+        $category = ProductCategory::findOrFail($validated['category_id']);
+
         if ($product->name !== $validated['name']) {
             $validated['slug'] = $this->uniqueSlug($validated['name'], $product->id);
         }
 
         $validated['is_active'] = $request->boolean('is_active');
         $validated['features'] = $this->linesToArray($request->features);
+        $validated['price_mode'] = $category->slug === 'rugs' ? 'fixed' : 'per_sqm';
+        $validated['selected_size_option_ids'] = $category->slug === 'rugs'
+            ? []
+            : array_values($request->input('selected_size_option_ids', []));
 
         if ($request->hasFile('main_image_file')) {
             $this->deleteStoredFile($product->main_image);
@@ -117,46 +111,22 @@ class ProductRangeController extends Controller
             $validated['main_image'] = $product->main_image;
         }
 
-        $existingGallery = collect($request->input('existing_gallery', []))
-            ->filter()
-            ->values()
-            ->all();
-
-        $oldGallery = collect($product->gallery ?: [])->filter()->values();
-
-        $oldGallery
-            ->reject(fn ($oldImage) => in_array($oldImage, $existingGallery, true))
-            ->each(fn ($oldImage) => $this->deleteStoredFile($oldImage));
-
-        $galleryImages = $existingGallery;
-
-        if ($request->hasFile('gallery_images')) {
-            foreach ($request->file('gallery_images') as $image) {
-                if ($image) {
-                    $galleryImages[] = $image->store('products/gallery', 'public');
-                }
-            }
-        }
-
-        $validated['gallery'] = array_values($galleryImages);
-
         $product->update($validated);
 
-        if ($this->requestHasColourRows($request)) {
-            $this->syncColours($product, $request);
-        }
-
-        $this->syncPrices($product, $request);
+        $this->syncGalleryImages($product, $request);
 
         return back()->with('success', 'Product range updated successfully.');
     }
 
     public function destroy(ProductRange $product): RedirectResponse
     {
+        $product->load('galleryImages');
+
         $this->deleteStoredFile($product->main_image);
 
-        foreach (($product->gallery ?: []) as $image) {
-            $this->deleteStoredFile($image);
+        foreach ($product->galleryImages as $galleryImage) {
+            $this->deleteStoredFile($galleryImage->image);
+            $galleryImage->delete();
         }
 
         $product->delete();
@@ -175,10 +145,14 @@ class ProductRangeController extends Controller
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get(),
-            'sizes' => ProductSizeOption::orderBy('sort_order')->orderBy('sqm')->get(),
-            'priceMap' => $product->exists
-                ? $product->prices->keyBy('product_size_option_id')
-                : collect(),
+            'sizes' => ProductSizeOption::where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('sqm')
+                ->get(),
+            'selectedSizeIds' => collect(old('selected_size_option_ids', $product->selected_size_option_ids ?: []))
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->all(),
         ];
     }
 
@@ -198,30 +172,28 @@ class ProductRangeController extends Controller
             'description' => ['nullable', 'string'],
 
             'main_image_file' => $mainImageRule,
+
             'gallery_images' => ['nullable', 'array'],
             'gallery_images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'existing_gallery' => ['nullable', 'array'],
-            'existing_gallery.*' => ['nullable', 'string'],
+            'gallery_colour_names' => ['nullable', 'array'],
+            'gallery_colour_names.*' => ['nullable', 'string', 'max:190'],
+
+            'existing_gallery_ids' => ['nullable', 'array'],
+            'existing_gallery_ids.*' => ['nullable', 'integer', 'exists:product_gallery_images,id'],
+            'existing_gallery_colour_names' => ['nullable', 'array'],
+            'existing_gallery_colour_names.*' => ['nullable', 'string', 'max:190'],
 
             'features' => ['nullable', 'string'],
             'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'unit' => ['nullable', 'string', 'max:30'],
 
-            'colour_group' => ['nullable', 'string', 'max:120'],
+            'base_price' => ['required', 'numeric', 'min:0'],
+
+            'selected_size_option_ids' => ['nullable', 'array'],
+            'selected_size_option_ids.*' => ['nullable', 'integer', 'exists:product_size_options,id'],
+
             'size_group' => ['nullable', 'string', 'max:120'],
             'room' => ['nullable', 'string', 'max:120'],
-
-            'colour_names' => ['nullable', 'array'],
-            'colour_names.*' => ['nullable', 'string', 'max:190'],
-            'colour_swatches' => ['nullable', 'array'],
-            'colour_swatches.*' => ['nullable', 'regex:/^#?[0-9A-Fa-f]{6}$/'],
-            'colour_groups' => ['nullable', 'array'],
-            'colour_groups.*' => ['nullable', 'string', 'max:120'],
-
-            'prices' => ['nullable', 'array'],
-            'prices.*' => ['nullable', 'numeric', 'min:0'],
-            'regular_prices' => ['nullable', 'array'],
-            'regular_prices.*' => ['nullable', 'numeric', 'min:0'],
 
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
@@ -237,178 +209,65 @@ class ProductRangeController extends Controller
             }
         }
 
-        $hasAtLeastOnePrice = collect($request->input('prices', []))
-            ->filter(fn ($price) => $price !== null && $price !== '')
-            ->isNotEmpty();
+        $category = ProductCategory::find($validated['category_id']);
+        $isRug = $category && $category->slug === 'rugs';
 
-        if (!$hasAtLeastOnePrice) {
+        if (!$isRug && !count($request->input('selected_size_option_ids', []))) {
             throw ValidationException::withMessages([
-                'prices' => 'Please add at least one size price for this product range.',
+                'selected_size_option_ids' => 'Please select at least one size for this product.',
             ]);
         }
 
         return $validated;
     }
 
-    private function requestHasColourRows(Request $request): bool
+    private function syncGalleryImages(ProductRange $product, Request $request): void
     {
-        return $request->has('colour_names')
-            || $request->has('colour_swatches')
-            || $request->has('colour_groups');
-    }
+        $product->load('galleryImages');
 
-    private function syncColours(ProductRange $product, Request $request): void
-    {
-        $names = $request->input('colour_names', []);
-        $swatches = $request->input('colour_swatches', []);
-        $groups = $request->input('colour_groups', []);
+        $keptIds = collect($request->input('existing_gallery_ids', []))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->values();
 
-        $product->colours()->delete();
+        foreach ($product->galleryImages as $galleryImage) {
+            if (!$keptIds->contains($galleryImage->id)) {
+                $this->deleteStoredFile($galleryImage->image);
+                $galleryImage->delete();
+            }
+        }
 
-        foreach ($swatches as $index => $swatch) {
-            $swatch = $this->normalizeHexColour($swatch);
+        foreach ($keptIds as $sortOrder => $galleryId) {
+            $galleryImage = ProductGalleryImage::where('product_range_id', $product->id)
+                ->where('id', $galleryId)
+                ->first();
 
-            if (!$swatch) {
+            if (!$galleryImage) {
                 continue;
             }
 
-            $name = trim((string) ($names[$index] ?? ''));
-            $group = trim((string) ($groups[$index] ?? ''));
-
-            if ($name === '') {
-                $name = $this->guessColourName($swatch);
-            }
-
-            if ($group === '') {
-                $group = $this->guessColourGroup($swatch);
-            }
-
-            ProductColour::create([
-                'product_range_id' => $product->id,
-                'name' => $name,
-                'swatch' => $swatch,
-                'colour_group' => $group,
-                'sort_order' => $index,
+            $galleryImage->update([
+                'colour_name' => $request->input("existing_gallery_colour_names.$galleryId"),
+                'sort_order' => $sortOrder,
             ]);
         }
-    }
 
-    private function normalizeHexColour(?string $value): ?string
-    {
-        $value = trim((string) $value);
+        if ($request->hasFile('gallery_images')) {
+            $colourNames = $request->input('gallery_colour_names', []);
+            $startSort = $product->galleryImages()->count();
 
-        if ($value === '') {
-            return null;
-        }
+            foreach ($request->file('gallery_images') as $index => $image) {
+                if (!$image) {
+                    continue;
+                }
 
-        if (!str_starts_with($value, '#')) {
-            $value = '#' . $value;
-        }
-
-        if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $value)) {
-            return null;
-        }
-
-        return strtoupper($value);
-    }
-
-    private function guessColourName(string $hex): string
-    {
-        $group = $this->guessColourGroup($hex);
-
-        return match ($group) {
-            'Black' => 'Deep Black',
-            'White' => 'Soft White',
-            'Grey' => 'Soft Grey',
-            'Brown' => 'Warm Brown',
-            'Blue' => 'Classic Blue',
-            'Green' => 'Natural Green',
-            'Red' => 'Deep Red',
-            'Orange' => 'Warm Orange',
-            'Yellow' => 'Soft Yellow',
-            'Purple' => 'Soft Purple',
-            'Pink' => 'Soft Pink',
-            default => 'Warm Neutral',
-        };
-    }
-
-    private function guessColourGroup(string $hex): string
-    {
-        $hex = ltrim($hex, '#');
-
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
-
-        $max = max($r, $g, $b);
-        $min = min($r, $g, $b);
-        $delta = $max - $min;
-
-        if ($max < 35) {
-            return 'Black';
-        }
-
-        if ($min > 225) {
-            return 'White';
-        }
-
-        if ($delta < 18) {
-            return 'Grey';
-        }
-
-        if ($r > $g && $r > $b) {
-            if ($g > 150 && $b < 90) {
-                return 'Yellow';
+                ProductGalleryImage::create([
+                    'product_range_id' => $product->id,
+                    'image' => $image->store('products/gallery', 'public'),
+                    'colour_name' => $colourNames[$index] ?? null,
+                    'sort_order' => $startSort + $index,
+                ]);
             }
-
-            if ($g > 90 && $b < 90) {
-                return 'Orange';
-            }
-
-            if ($b > 120) {
-                return 'Pink';
-            }
-
-            return 'Red';
-        }
-
-        if ($g > $r && $g > $b) {
-            return 'Green';
-        }
-
-        if ($b > $r && $b > $g) {
-            if ($r > 110) {
-                return 'Purple';
-            }
-
-            return 'Blue';
-        }
-
-        if ($r > 100 && $g > 70 && $b < 80) {
-            return 'Brown';
-        }
-
-        return 'Neutral';
-    }
-
-    private function syncPrices(ProductRange $product, Request $request): void
-    {
-        $prices = $request->input('prices', []);
-        $regularPrices = $request->input('regular_prices', []);
-
-        $product->prices()->delete();
-
-        foreach ($prices as $sizeId => $price) {
-            if ($price === null || $price === '') {
-                continue;
-            }
-
-            ProductRangePrice::create([
-                'product_range_id' => $product->id,
-                'product_size_option_id' => $sizeId,
-                'price' => $price,
-                'regular_price' => $regularPrices[$sizeId] ?? null,
-            ]);
         }
     }
 

@@ -65,6 +65,20 @@
             'badge' => null,
         ],
         [
+            'label' => 'Special Promos',
+            'url' => route('admin.special-promos.index'),
+            'active' => request()->routeIs('admin.special-promos.*'),
+            'icon' => 'star',
+            'badge' => null,
+        ],
+        [
+            'label' => 'Blog Posts',
+            'url' => route('admin.blog-posts.index'),
+            'active' => request()->routeIs('admin.blog-posts.*'),
+            'icon' => 'article',
+            'badge' => null,
+        ],
+        [
             'label' => 'Settings',
             'url' => route('admin.settings.edit'),
             'active' => request()->routeIs('admin.settings.*'),

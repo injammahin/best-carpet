@@ -29,7 +29,7 @@
     $topbarMiddle = $settings['topbar_middle'] ?? 'Carpet · Timber · Hybrid · Laminate · Vinyl · Rugs';
     $topbarRight = $settings['topbar_right'] ?? 'Premium flooring showroom';
 
-    $consultationButtonText = $settings['consultation_button_text'] ?? 'Book free consultation';
+    $consultationButtonText = $settings['consultation_button_text'] ?? 'Book a free Measure & Quote';
 
     $carpetCategory = ProductCategory::active()
         ->where('slug', 'carpet')
@@ -72,10 +72,17 @@
             'url' => route('frontend.product.show', $category->slug),
             'slug' => $category->slug,
         ])
-        ->push([
-            'label' => 'Book Quote',
-            'url' => route('frontend.quote'),
-            'slug' => 'book-quote',
+        ->concat([
+            [
+                'label' => 'Specials',
+                'url' => route('frontend.specials'),
+                'slug' => 'specials',
+            ],
+            [
+                'label' => 'Blog',
+                'url' => route('frontend.blog.index'),
+                'slug' => 'blog',
+            ],
         ])
         ->values()
         ->all();
@@ -135,9 +142,19 @@
 
                 <div class="hidden items-center gap-3 lg:flex">
                     <a href="{{ route('frontend.quote') }}" class="mega-consult-btn">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M4 20l7-16 3 7 7 3-17 6z" />
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path
+                                d="M4 8.5C4 5.5 6.5 3 9.5 3h5C17.5 3 20 5.5 20 8.5v7C20 18.5 17.5 21 14.5 21h-5C6.5 21 4 18.5 4 15.5v-7z" />
+                            <path d="M8 7h8" />
+                            <path d="M8 11h2" />
+                            <path d="M12 11h2" />
+                            <path d="M16 11h0.01" />
+                            <path d="M8 15h2" />
+                            <path d="M12 15h2" />
+                            <path d="M16 15h0.01" />
+                            <path d="M7 20l10-16" />
                         </svg>
+
                         {{ $consultationButtonText }}
                     </a>
 
@@ -426,8 +443,13 @@
                     </a>
                 @endforeach
 
-                <a href="{{ route('frontend.quote') }}" class="mobile-menu-link is-cta">Book Quote</a>
+                <a href="{{ route('frontend.specials') }}" class="mobile-menu-link">
+                    Specials
+                </a>
 
+                <a href="{{ route('frontend.blog.index') }}" class="mobile-menu-link">
+                    Blog
+                </a>
                 @if($showAdminLogin)
                     <a href="{{ url('/admin/login') }}" class="mobile-menu-link">Admin Login</a>
                 @endif

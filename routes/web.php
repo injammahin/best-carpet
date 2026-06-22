@@ -13,6 +13,10 @@ use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\QuoteRequestController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\HomePageSettingController;
+use App\Http\Controllers\Admin\SpecialPromoController;
+use App\Http\Controllers\Admin\BlogPostController;
+use App\Http\Controllers\Frontend\SpecialController;
+use App\Http\Controllers\Frontend\BlogController;
 /*
 |--------------------------------------------------------------------------
 | Frontend Routes
@@ -37,6 +41,10 @@ Route::name('frontend.')->group(function () {
     Route::get('/contact', [PageController::class, 'contact'])->name('contact');
     Route::get('/search-suggestions', [PageController::class, 'searchSuggestions'])
     ->name('search.suggestions');
+    Route::get('/specials', [SpecialController::class, 'index'])->name('specials');
+
+    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
     /*
     |--------------------------------------------------------------------------
@@ -142,6 +150,8 @@ Route::prefix('admin')
         */
 
         Route::resource('faqs', FaqController::class);
+        Route::resource('special-promos', SpecialPromoController::class)->except(['show']);
+        Route::resource('blog-posts', BlogPostController::class)->except(['show']);
 
         /*
         |--------------------------------------------------------------------------

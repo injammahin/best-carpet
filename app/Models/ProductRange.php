@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductRange extends Model
@@ -22,6 +22,9 @@ class ProductRange extends Model
         'features',
         'rating',
         'unit',
+        'base_price',
+        'selected_size_option_ids',
+        'price_mode',
         'colour_group',
         'size_group',
         'room',
@@ -32,152 +35,181 @@ class ProductRange extends Model
     protected $casts = [
         'gallery' => 'array',
         'features' => 'array',
-        'rating' => 'decimal:1',
+        'selected_size_option_ids' => 'array',
         'is_active' => 'boolean',
+        'base_price' => 'decimal:2',
+        'rating' => 'decimal:1',
     ];
 
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(ProductCategory::class, 'category_id');
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
-    public function subcategory(): BelongsTo
-    {
-        return $this->belongsTo(ProductCategory::class, 'subcategory_id');
-    }
-
-    public function colours(): HasMany
-    {
-        return $this->hasMany(ProductColour::class)->orderBy('sort_order')->orderBy('name');
-    }
-
-    public function prices(): HasMany
-    {
-        return $this->hasMany(ProductRangePrice::class);
-    }
-
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function priceFrom(): float
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function category()
     {
-        return (float) ($this->prices()->min('price') ?? 0);
+        return $this->belongsTo(ProductCategory::class, 'category_id');
     }
+
+    public function subcategory()
+    {
+        return $this->belongsTo(ProductCategory::class, 'subcategory_id');
+    }
+
+    public function galleryImages()
+    {
+        return $this->hasMany(ProductGalleryImage::class, 'product_range_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Old relationships kept for safety
+    |--------------------------------------------------------------------------
+    | These are not used in the new pricing flow, but keeping them prevents
+    | old admin/frontend code from breaking if any file still references them.
+    */
+
+    public function colours()
+    {
+        return $this->hasMany(ProductColour::class, 'product_range_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function prices()
+    {
+        return $this->hasMany(ProductRangePrice::class, 'product_range_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers
+    |--------------------------------------------------------------------------
+    */
 
     public function imageUrl(): string
     {
-        return $this->mediaUrl($this->main_image)
-            ?: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80';
+        if (!$this->main_image) {
+            return asset('images/Background Pic 1.webp');
+        }
+
+        if (Str::startsWith($this->main_image, ['http://', 'https://'])) {
+            return $this->main_image;
+        }
+
+        if (Str::startsWith($this->main_image, ['/storage/', 'storage/'])) {
+            return asset(ltrim($this->main_image, '/'));
+        }
+
+        if (Str::startsWith($this->main_image, ['/images/', 'images/'])) {
+            return asset(ltrim($this->main_image, '/'));
+        }
+
+        return Storage::disk('public')->url($this->main_image);
     }
 
-    public function galleryImages(): array
+    public function isRug(): bool
     {
-        $gallery = collect($this->gallery ?: [])
-            ->map(fn ($image) => $this->mediaUrl($image))
+        return $this->price_mode === 'fixed'
+            || $this->category?->slug === 'rugs'
+            || $this->subcategory?->slug === 'rugs';
+    }
+
+    public function priceFrom(): float
+    {
+        return (float) ($this->base_price ?? 0);
+    }
+
+    public function displayUnit(): string
+    {
+        return $this->isRug() ? 'item' : ($this->unit ?: 'm²');
+    }
+
+    public function selectedSizeOptions()
+    {
+        $ids = collect($this->selected_size_option_ids ?: [])
             ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
             ->values()
             ->all();
 
-        if (!count($gallery)) {
-            $gallery = [$this->imageUrl()];
+        if (!count($ids)) {
+            return collect();
         }
 
-        return $gallery;
+        return ProductSizeOption::query()
+            ->whereIn('id', $ids)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('sqm')
+            ->get();
     }
 
-    public function featureList(): array
+    public function frontendSizes(): array
     {
-        return array_values($this->features ?: [
-            'Free measure & quote available',
-            'Premium showroom support',
-            'Suitable for residential projects',
-            'Professional installation advice',
-        ]);
-    }
-
-    private function mediaUrl(?string $path): ?string
-    {
-        if (!$path) {
-            return null;
+        if ($this->isRug()) {
+            return [];
         }
 
-        if (Str::startsWith($path, ['http://', 'https://'])) {
-            return $path;
-        }
+        $basePrice = (float) ($this->base_price ?? 0);
 
-        if (Str::startsWith($path, ['/storage/', 'storage/'])) {
-            return asset(ltrim($path, '/'));
-        }
+        return $this->selectedSizeOptions()
+            ->map(function ($size) use ($basePrice) {
+                $sqm = (float) $size->sqm;
 
-        return asset('storage/' . ltrim($path, '/'));
-    }
-
-    public function toFrontendArray(): array
-    {
-        $this->loadMissing([
-            'category',
-            'subcategory',
-            'colours',
-            'prices.sizeOption',
-        ]);
-
-        $sizes = $this->prices
-            ->filter(fn ($price) => $price->sizeOption && $price->sizeOption->is_active)
-            ->sortBy(fn ($price) => $price->sizeOption->sort_order)
-            ->values()
-            ->map(function ($price) {
                 return [
-                    'id' => $price->sizeOption->id,
-                    'label' => $price->sizeOption->label,
-                    'sqm' => (float) $price->sizeOption->sqm,
-                    'size_group' => $price->sizeOption->size_group,
-                    'price' => (float) $price->price,
-                    'regular' => (float) ($price->regular_price ?: $price->price),
+                    'id' => $size->id,
+                    'label' => $size->label,
+                    'sqm' => $sqm,
+                    'size_group' => $size->size_group,
+                    'price' => round($basePrice * $sqm, 2),
+                    'price_per_sqm' => $basePrice,
                 ];
             })
             ->values()
             ->all();
+    }
 
-        return [
-            'id' => $this->id,
-            'slug' => $this->slug,
-            'name' => $this->name,
-            'badge' => $this->badge,
-            'category' => $this->category?->name ?: '',
-            'category_slug' => $this->category?->slug ?: '',
-            'subcategory' => $this->subcategory?->name,
-            'subcategory_slug' => $this->subcategory?->slug,
-            'short' => $this->short_description ?: '',
-            'description' => $this->description ?: $this->short_description ?: '',
-            'image' => $this->imageUrl(),
-            'gallery' => $this->galleryImages(),
-            'features' => $this->featureList(),
-            'rating' => (float) $this->rating,
-            'unit' => $this->unit,
-            'price_from' => $this->priceFrom(),
-            'colour_group' => $this->colour_group,
-            'size_group' => $this->size_group,
-            'room' => $this->room,
-            'colours' => $this->colours
-                ->map(fn ($colour) => [
-                    'id' => $colour->id,
-                    'name' => $colour->name,
-                    'swatch' => $colour->swatch,
-                    'colour_group' => $colour->colour_group,
-                ])
-                ->values()
-                ->all(),
-            'sizes' => $sizes,
-            'search' => strtolower(trim(
-                $this->name . ' ' .
-                $this->short_description . ' ' .
-                $this->category?->name . ' ' .
-                $this->subcategory?->name . ' ' .
-                $this->room . ' ' .
-                $this->colour_group
-            )),
-        ];
+    public function frontendGallery(): array
+    {
+        $gallery = collect();
+
+        if ($this->main_image) {
+            $gallery->push([
+                'image' => $this->imageUrl(),
+                'colour_name' => 'Main image',
+            ]);
+        }
+
+        foreach ($this->galleryImages as $item) {
+            $gallery->push([
+                'image' => $item->imageUrl(),
+                'colour_name' => $item->colour_name ?: 'Gallery image',
+            ]);
+        }
+
+        if (!$gallery->count()) {
+            $gallery->push([
+                'image' => asset('images/Background Pic 1.webp'),
+                'colour_name' => 'Gallery image',
+            ]);
+        }
+
+        return $gallery->values()->all();
     }
 }

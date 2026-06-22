@@ -30,7 +30,7 @@ class SiteSetting extends Model
             'topbar_middle' => 'Carpet · Timber · Hybrid · Laminate · Vinyl · Rugs',
             'topbar_right' => 'Premium flooring showroom',
 
-            'consultation_button_text' => 'Book free consultation',
+            'consultation_button_text' => 'Book a free Measure & Quote',
             'phone_number' => '1300 131 196',
             'phone_link' => '1300131196',
             'email' => 'hello@megacarpets.com',

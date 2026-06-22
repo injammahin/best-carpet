@@ -590,8 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: product.name || product.title || 'Product',
             category: product.category || '',
             image: product.image || '',
-            price: Number(extra.price ?? product.price ?? product.price_from ?? 0),
-            regular: Number(extra.regular ?? extra.regular_price ?? product.regular ?? product.regular_price ?? 0),
+            price: Number(extra.price ?? product.fixed_price ?? product.price ?? product.price_from ?? 0),
             colour: extra.colour || product.colour || '',
             type: extra.type || product.type || '',
             size_label: extra.size_label || extra.size || product.size_label || product.size || '',
@@ -634,6 +633,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveQuoteItems(items);
         renderQuoteDrawer();
+
+        document.dispatchEvent(new CustomEvent('megaQuoteUpdated'));
     }
 
     function updateQuoteQty(lineKey, delta) {
@@ -652,6 +653,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveQuoteItems(items);
         renderQuoteDrawer();
+
+        document.dispatchEvent(new CustomEvent('megaQuoteUpdated'));
     }
 
     function renderQuoteDrawer() {
@@ -666,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const emptyText = empty.querySelector('p');
 
         if (emptyText) {
-            emptyText.textContent = 'Select a size, then add products to your quote.';
+            emptyText.textContent = 'Select a size or rug, then add products to your quote.';
         }
 
         const items = getQuoteItems();
@@ -684,10 +687,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const metaParts = [
                 item.category || '',
+                item.type || '',
                 item.size_label || item.size || '',
                 item.sqm ? `${item.sqm}m²` : '',
                 item.colour || '',
-                item.type || '',
             ].filter(Boolean);
 
             row.className = 'grid grid-cols-[78px_1fr_auto] gap-3 border border-mega-line bg-white p-3 shadow-sm radius-7';
@@ -759,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: product.name || product.title || 'Product',
             category: product.category || '',
             image: product.image || '',
-            price: Number(product.price || product.price_from || 0),
+            price: Number(product.fixed_price || product.price || product.price_from || 0),
             unit: product.unit || '',
         };
 
@@ -862,38 +865,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
     |--------------------------------------------------------------------------
-    | Size-only product cards
+    | Product Cards
     |--------------------------------------------------------------------------
-    | Product flow:
-    | Choose size -> show rough price estimate -> add to quote
     */
-
-    function getSizeFromOption(option, product) {
-        if (!option || !option.value) {
-            return null;
-        }
-
-        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-        const sizeFromProduct = sizes[Number(option.value)] || {};
-
-        const label = option.dataset.label || sizeFromProduct.label || option.textContent.trim();
-        const sqm = option.dataset.sqm || sizeFromProduct.sqm || '';
-        const price = Number(option.dataset.price ?? sizeFromProduct.price ?? 0);
-        const regular = Number(
-            option.dataset.regularPrice ??
-            option.dataset.regular ??
-            sizeFromProduct.regular_price ??
-            sizeFromProduct.regular ??
-            price
-        );
-
-        return {
-            label,
-            sqm,
-            price,
-            regular,
-        };
-    }
 
     function setAddButtonState(button, disabled) {
         if (!button) {
@@ -905,17 +879,40 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.toggle('cursor-not-allowed', disabled);
     }
 
+    function getSizeFromOption(option, product) {
+        if (!option || !option.value) {
+            return null;
+        }
+
+        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+        const sizeFromProduct = sizes[Number(option.value)] || {};
+
+        return {
+            label: option.dataset.label || sizeFromProduct.label || option.textContent.trim(),
+            sqm: option.dataset.sqm || sizeFromProduct.sqm || '',
+            price: Number(option.dataset.price ?? sizeFromProduct.price ?? 0),
+        };
+    }
+
     function initSizeOnlyProductCards() {
         document.querySelectorAll('[data-product-card]').forEach((card) => {
             const product = parseJson(card.dataset.product, {});
             const sizeSelect = card.querySelector('[data-size-select]');
             const pricePanel = card.querySelector('[data-price-panel]');
             const priceText = card.querySelector('[data-price-text]');
-            const regularText = card.querySelector('[data-regular-text]');
             const priceOutput = card.querySelector('[data-price-output]');
             const addQuoteButton = card.querySelector('[data-add-quote]');
 
-            if (!sizeSelect || !addQuoteButton) {
+            if (!addQuoteButton) {
+                return;
+            }
+
+            const isFixedProduct =
+                product.is_rug === true ||
+                product.price_mode === 'fixed' ||
+                (!sizeSelect && Number(product.fixed_price || 0) > 0);
+
+            if (!isFixedProduct && !sizeSelect) {
                 return;
             }
 
@@ -923,61 +920,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let selectedSize = null;
 
-            sizeSelect.disabled = false;
-
-            const firstOption = sizeSelect.querySelector('option[value=""]');
-
-            if (firstOption && firstOption.textContent.toLowerCase().includes('colour')) {
-                firstOption.textContent = 'Choose a size for rough estimate...';
-            }
-
-            if (!firstOption && sizeSelect.options.length) {
-                const placeholder = document.createElement('option');
-                placeholder.value = '';
-                placeholder.textContent = 'Choose a size for rough estimate...';
-                sizeSelect.prepend(placeholder);
-                sizeSelect.value = '';
-            }
-
-            setAddButtonState(addQuoteButton, true);
-            pricePanel?.classList.add('hidden');
-
-            const resetEstimate = () => {
-                selectedSize = null;
-
-                if (priceText) {
-                    priceText.textContent = '$0';
-                }
-
-                if (regularText) {
-                    regularText.textContent = '$0';
-                }
-
-                if (priceOutput) {
-                    priceOutput.textContent = 'Select size';
-                }
-
-                pricePanel?.classList.add('hidden');
-                setAddButtonState(addQuoteButton, true);
-            };
-
-            sizeSelect.addEventListener('change', () => {
-                const option = sizeSelect.options[sizeSelect.selectedIndex];
-                selectedSize = getSizeFromOption(option, product);
-
-                if (!selectedSize) {
-                    resetEstimate();
-                    return;
-                }
+            if (isFixedProduct) {
+                selectedSize = {
+                    label: 'Fixed product price',
+                    sqm: '',
+                    price: Number(product.fixed_price || product.price_from || product.price || 0),
+                };
 
                 if (priceText) {
                     priceText.textContent = money(selectedSize.price);
-                }
-
-                if (regularText) {
-                    regularText.textContent = selectedSize.regular > 0
-                        ? money(selectedSize.regular)
-                        : money(selectedSize.price);
                 }
 
                 if (priceOutput) {
@@ -986,11 +937,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 pricePanel?.classList.remove('hidden');
                 setAddButtonState(addQuoteButton, false);
-            });
+            } else {
+                sizeSelect.disabled = false;
+                pricePanel?.classList.add('hidden');
+                setAddButtonState(addQuoteButton, true);
+
+                const firstOption = sizeSelect.querySelector('option[value=""]');
+
+                if (firstOption && firstOption.textContent.toLowerCase().includes('colour')) {
+                    firstOption.textContent = 'Choose a size for rough estimate...';
+                }
+
+                if (!firstOption && sizeSelect.options.length) {
+                    const placeholder = document.createElement('option');
+                    placeholder.value = '';
+                    placeholder.textContent = 'Choose a size for rough estimate...';
+                    sizeSelect.prepend(placeholder);
+                    sizeSelect.value = '';
+                }
+
+                const resetEstimate = () => {
+                    selectedSize = null;
+
+                    if (priceText) {
+                        priceText.textContent = '$0';
+                    }
+
+                    if (priceOutput) {
+                        priceOutput.textContent = 'Select size';
+                    }
+
+                    pricePanel?.classList.add('hidden');
+                    setAddButtonState(addQuoteButton, true);
+                };
+
+                sizeSelect.addEventListener('change', () => {
+                    const option = sizeSelect.options[sizeSelect.selectedIndex];
+                    selectedSize = getSizeFromOption(option, product);
+
+                    if (!selectedSize) {
+                        resetEstimate();
+                        return;
+                    }
+
+                    if (priceText) {
+                        priceText.textContent = money(selectedSize.price);
+                    }
+
+                    if (priceOutput) {
+                        priceOutput.textContent = money(selectedSize.price);
+                    }
+
+                    pricePanel?.classList.remove('hidden');
+                    setAddButtonState(addQuoteButton, false);
+                });
+            }
 
             addQuoteButton.addEventListener('click', () => {
                 if (!selectedSize) {
-                    sizeSelect.focus();
+                    sizeSelect?.focus();
                     return;
                 }
 
@@ -998,7 +1003,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     size_label: selectedSize.label,
                     sqm: selectedSize.sqm,
                     price: selectedSize.price,
-                    regular: selectedSize.regular,
                 });
 
                 const originalText = addQuoteButton.textContent;
@@ -1011,6 +1015,114 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    function initTypeOnlyProductCards() {
+        document.querySelectorAll('[data-product-card][data-types]').forEach((card) => {
+            const product = parseJson(card.dataset.product, {});
+            const typeOptions = parseJson(card.dataset.types, []);
+            const typeSelect = card.querySelector('[data-type-select]');
+            const priceOutput = card.querySelector('[data-price-output]');
+            const addQuoteButton = card.querySelector('[data-add-quote]');
+
+            if (!typeSelect || !addQuoteButton) {
+                return;
+            }
+
+            addQuoteButton.dataset.jsBound = '1';
+
+            let selectedType = null;
+
+            setAddButtonState(addQuoteButton, true);
+
+            typeSelect.addEventListener('change', () => {
+                const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+
+                if (!selectedOption || !selectedOption.value) {
+                    selectedType = null;
+
+                    if (priceOutput) {
+                        priceOutput.textContent = 'Select type';
+                    }
+
+                    setAddButtonState(addQuoteButton, true);
+                    return;
+                }
+
+                const label = selectedOption.dataset.typeLabel || selectedOption.value;
+                const matchedType = Array.isArray(typeOptions)
+                    ? typeOptions.find((item) => String(item.label) === String(label))
+                    : null;
+
+                selectedType = {
+                    label,
+                    price: Number(selectedOption.dataset.typePrice || matchedType?.price || 0),
+                    sqm: matchedType?.sqm || selectedOption.dataset.typeSqm || '',
+                };
+
+                if (priceOutput) {
+                    priceOutput.textContent = money(selectedType.price);
+                }
+
+                setAddButtonState(addQuoteButton, false);
+            });
+
+            addQuoteButton.addEventListener('click', () => {
+                if (!selectedType) {
+                    typeSelect.focus();
+                    return;
+                }
+
+                const extra = {
+                    price: selectedType.price,
+                };
+
+                if (selectedType.sqm) {
+                    extra.size_label = selectedType.label;
+                    extra.sqm = selectedType.sqm;
+                } else {
+                    extra.type = selectedType.label;
+                }
+
+                addToQuote(product, extra);
+
+                const originalText = addQuoteButton.textContent;
+
+                addQuoteButton.textContent = 'Added to quote';
+
+                setTimeout(() => {
+                    addQuoteButton.textContent = originalText || 'Add to quote';
+                }, 1200);
+            });
+        });
+    }
+
+    initSizeOnlyProductCards();
+    initTypeOnlyProductCards();
+
+    document.querySelectorAll('[data-add-quote]').forEach((button) => {
+        if (button.dataset.jsBound === '1') {
+            return;
+        }
+
+        button.addEventListener('click', () => {
+            addToQuote(parseButtonProduct(button));
+        });
+    });
+
+    document
+        .querySelectorAll('.wishlist-toggle, [data-wishlist-button], [data-product-wishlist]')
+        .forEach((button) => {
+            button.addEventListener('click', () => {
+                toggleWishlist(parseButtonProduct(button));
+            });
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quote Form Sync
+    |--------------------------------------------------------------------------
+    */
+
     function formatQuoteItemsForMessage() {
         const items = getQuoteItems();
         const customerNote = document.querySelector('[data-customer-note]')?.value.trim() || '';
@@ -1098,36 +1210,36 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'grid gap-4 rounded-[7px] border border-orange-100 bg-white p-4 shadow-sm sm:grid-cols-[72px_1fr_auto] sm:items-center';
 
             card.innerHTML = `
-            <div class="h-[72px] w-[72px] overflow-hidden rounded-[7px] bg-mega-soft">
-                ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name || 'Product')}" class="h-full w-full object-cover">` : ''}
-            </div>
-
-            <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="rounded-full bg-mega-orange/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-mega-orange">
-                        Product ${index + 1}
-                    </span>
+                <div class="h-[72px] w-[72px] overflow-hidden rounded-[7px] bg-mega-soft">
+                    ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name || 'Product')}" class="h-full w-full object-cover">` : ''}
                 </div>
 
-                <h4 class="mt-2 text-base font-black leading-tight text-mega-black">
-                    ${escapeHtml(item.name || 'Product')}
-                </h4>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="rounded-full bg-mega-orange/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-mega-orange">
+                            Product ${index + 1}
+                        </span>
+                    </div>
 
-                <p class="mt-1 text-sm font-semibold leading-6 text-mega-muted">
-                    ${escapeHtml(metaParts.join(' · '))}
-                </p>
-            </div>
+                    <h4 class="mt-2 text-base font-black leading-tight text-mega-black">
+                        ${escapeHtml(item.name || 'Product')}
+                    </h4>
 
-            <div class="rounded-[7px] bg-[#f7f3ed] px-4 py-3 text-right">
-                <p class="text-[10px] font-black uppercase tracking-[0.16em] text-mega-muted">
-                    Rough estimate
-                </p>
+                    <p class="mt-1 text-sm font-semibold leading-6 text-mega-muted">
+                        ${escapeHtml(metaParts.join(' · '))}
+                    </p>
+                </div>
 
-                <p class="mt-1 text-xl font-black text-mega-black">
-                    ${money(item.price || 0)}
-                </p>
-            </div>
-        `;
+                <div class="rounded-[7px] bg-[#f7f3ed] px-4 py-3 text-right">
+                    <p class="text-[10px] font-black uppercase tracking-[0.16em] text-mega-muted">
+                        Rough estimate
+                    </p>
+
+                    <p class="mt-1 text-xl font-black text-mega-black">
+                        ${money(item.price || 0)}
+                    </p>
+                </div>
+            `;
 
             preview.appendChild(card);
         });
@@ -1188,97 +1300,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('megaQuoteUpdated', () => {
         syncQuoteItemsToQuoteForm();
     });
-    initSizeOnlyProductCards();
-    function initTypeOnlyProductCards() {
-        document.querySelectorAll('[data-product-card][data-types]').forEach((card) => {
-            const product = parseJson(card.dataset.product, {});
-            const typeSelect = card.querySelector('[data-type-select]');
-            const priceOutput = card.querySelector('[data-price-output]');
-            const addQuoteButton = card.querySelector('[data-add-quote]');
-
-            if (!typeSelect || !addQuoteButton) {
-                return;
-            }
-
-            addQuoteButton.dataset.jsBound = '1';
-
-            let selectedType = null;
-
-            const setAddButtonState = (disabled) => {
-                addQuoteButton.disabled = disabled;
-                addQuoteButton.classList.toggle('opacity-60', disabled);
-                addQuoteButton.classList.toggle('cursor-not-allowed', disabled);
-            };
-
-            setAddButtonState(true);
-
-            typeSelect.addEventListener('change', () => {
-                const selectedOption = typeSelect.options[typeSelect.selectedIndex];
-
-                if (!selectedOption || !selectedOption.value) {
-                    selectedType = null;
-
-                    if (priceOutput) {
-                        priceOutput.textContent = 'Select type';
-                    }
-
-                    setAddButtonState(true);
-                    return;
-                }
-
-                selectedType = {
-                    label: selectedOption.dataset.typeLabel || selectedOption.value,
-                    price: Number(selectedOption.dataset.typePrice || 0),
-                };
-
-                if (priceOutput) {
-                    priceOutput.textContent = money(selectedType.price) + '/m²';
-                }
-
-                setAddButtonState(false);
-            });
-
-            addQuoteButton.addEventListener('click', () => {
-                if (!selectedType) {
-                    typeSelect.focus();
-                    return;
-                }
-
-                addToQuote(product, {
-                    type: selectedType.label,
-                    price: selectedType.price,
-                });
-
-                const originalText = addQuoteButton.textContent;
-
-                addQuoteButton.textContent = 'Added to quote';
-
-                setTimeout(() => {
-                    addQuoteButton.textContent = originalText || 'Add to quote';
-                }, 1200);
-            });
-        });
-    }
-
-
-    initTypeOnlyProductCards();
-    document.querySelectorAll('[data-add-quote]').forEach((button) => {
-        if (button.dataset.jsBound === '1') {
-            return;
-        }
-
-        button.addEventListener('click', () => {
-            addToQuote(parseButtonProduct(button));
-        });
-    });
-
-    document
-        .querySelectorAll('.wishlist-toggle, [data-wishlist-button], [data-product-wishlist]')
-        .forEach((button) => {
-            button.addEventListener('click', () => {
-                toggleWishlist(parseButtonProduct(button));
-            });
-        });
 
     /*
     |--------------------------------------------------------------------------
@@ -1311,6 +1332,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initGalleryAndZoom() {
         const mainImage = document.querySelector('[data-main-image]');
+        const colourLabel = document.querySelector('[data-gallery-colour-label]');
 
         document.querySelectorAll('[data-gallery-thumb]').forEach((button, index) => {
             if (index === 0) {
@@ -1326,6 +1348,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (mainImage && button.dataset.image) {
                     mainImage.src = button.dataset.image;
+                }
+
+                if (colourLabel && button.dataset.colourName) {
+                    colourLabel.textContent = button.dataset.colourName;
                 }
             });
         });

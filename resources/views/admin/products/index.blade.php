@@ -10,7 +10,8 @@
             <p class="section-label mb-2">Product catalogue</p>
             <h1 class="text-3xl text-mega-black">Product Ranges</h1>
             <p class="mt-2 text-sm text-mega-muted">
-                Each product range can have multiple colours. Prices are controlled by range and area size only.
+                Each product has one base price. Flooring products calculate by selected room size, while rugs use one fixed
+                price.
             </p>
         </div>
 
@@ -88,7 +89,11 @@
 
                             <td class="px-6 py-5">
                                 <p class="font-semibold text-mega-black">
-                                    ${{ number_format($product->priceFrom(), 2) }}/{{ $product->unit }}
+                                    @if($product->isRug())
+                                        ${{ number_format($product->priceFrom(), 2) }} fixed
+                                    @else
+                                        ${{ number_format($product->priceFrom(), 2) }}/m²
+                                    @endif
                                 </p>
                             </td>
 
