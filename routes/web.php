@@ -24,6 +24,12 @@ use App\Http\Controllers\Frontend\BlogController;
 */
 
 Route::name('frontend.')->group(function () {
+    Route::get('/product-advice', [PageController::class, 'productAdvice'])->name('product-advice');
+    Route::get('/installation-guide', [PageController::class, 'installationGuide'])->name('installation-guide');
+    Route::get('/care-and-maintenance', [PageController::class, 'careMaintenance'])->name('care-maintenance');
+    Route::get('/warranty-information', [PageController::class, 'warrantyInformation'])->name('warranty-information');
+    Route::get('/terms-and-conditions', [PageController::class, 'termsConditions'])->name('terms-conditions');
+    Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
     Route::get('/', [PageController::class, 'home'])->name('home');
 
     Route::get('/products', [PageController::class, 'products'])->name('products');

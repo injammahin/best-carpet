@@ -5,7 +5,7 @@
 
 @section('content')
 
-    <section class="bg-mega-cream py-12 md:py-16">
+    {{-- <section class="bg-mega-cream py-12 md:py-16">
         <div class="site-container">
             <div class="mx-auto max-w-4xl text-center">
                 <p class="section-kicker">Current promotions</p>
@@ -20,9 +20,9 @@
                 </p>
             </div>
         </div>
-    </section>
+    </section> --}}
 
-    <section class="bg-white py-12 md:py-16">
+    <section class="bg-white py-10 md:py-12">
         <div class="site-container">
             @if($promos->count())
                 <div class="specials-slider" data-specials-slider>
@@ -141,8 +141,8 @@
         .specials-content h2 {
             margin-top: 14px;
             color: white;
-            font-size: clamp(42px, 6vw, 84px);
-            font-weight: 900;
+            font-size: clamp(22px, 3vw, 44px);
+            font-weight: 700;
             line-height: 0.98;
             letter-spacing: -0.07em;
         }

@@ -731,4 +731,29 @@ class PageController extends Controller
                 ->all(),
         ]);
     }
+    public function installationGuide(): View
+    {
+        return view('frontend.installation-guide');
+    }
+    public function warrantyInformation(): View
+    {
+        return view('frontend.warranty-information');
+    }
+    public function careMaintenance(): View
+    {
+        return view('frontend.care-maintenance');
+    }
+    public function productAdvice(): View
+    {
+        return view('frontend.product-advice');
+    }
+    public function termsConditions(): View
+    {
+        return view('frontend.terms-and-conditions');
+    }
+
+    public function privacyPolicy(): View
+    {
+        return view('frontend.privacy-policy');
+    }
 }
