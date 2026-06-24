@@ -65,7 +65,7 @@
                             class="h-[420px] w-full rounded-[26px] object-fill md:h-[580px]"
                         >
 
-                        <div class="absolute bottom-8 left-8 right-8 rounded-[24px] border border-white/20 bg-white/90 p-5 shadow-xl backdrop-blur">
+                        {{-- <div class="absolute bottom-8 left-8 right-8 rounded-[24px] border border-white/20 bg-white/90 p-5 shadow-xl backdrop-blur">
                             <p class="text-xs font-bold uppercase tracking-[0.22em] text-mega-orange">
                                 Premium showroom experience
                             </p>
@@ -73,7 +73,7 @@
                             <p class="mt-2 text-xl font-black text-mega-black">
                                 See colours, compare textures and choose with confidence.
                             </p>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
