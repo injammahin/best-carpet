@@ -128,7 +128,7 @@
                     </a>
                 </div>
 
-                <div class="premium-hero-stats">
+                {{-- <div class="premium-hero-stats">
                     <div>
                         <strong>4</strong>
                         <span>Core flooring categories</span>
@@ -143,7 +143,7 @@
                         <strong>0</strong>
                         <span>Checkout confusion</span>
                     </div>
-                </div>
+                </div> --}}
             </div>
 
             <div class="premium-hero-visual">

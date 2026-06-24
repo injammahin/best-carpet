@@ -72,7 +72,7 @@ class QuoteRequestController extends Controller
         ]);
 
         return redirect()
-            ->route('frontend.quote')
+            ->back()
             ->with('quote_success', 'Thank you. Your free measure and quote request has been submitted successfully.');
     }
 
@@ -98,7 +98,7 @@ class QuoteRequestController extends Controller
             : ['residential'];
 
         $comments = trim(
-            "Homepage quick quote request" .
+            "Quick quote / contact enquiry" .
             "\n\nProduct category: " . $validated['product_category'] .
             "\nRoom: " . $validated['room'] .
             "\nApprox room size: " . ($validated['approximate_size'] ?? 'Not provided') .
@@ -116,7 +116,7 @@ class QuoteRequestController extends Controller
             'subscribe' => false,
 
             'job_type' => $jobType,
-            'installation_address' => 'Not provided from homepage quick quote',
+            'installation_address' => 'Not provided from quick quote / contact form',
             'suburb' => 'Not provided',
             'postcode' => 'Not provided',
 
@@ -134,8 +134,7 @@ class QuoteRequestController extends Controller
         ]);
 
         return redirect()
-            ->route('frontend.home')
-            ->withFragment('quote')
-            ->with('quick_quote_success', 'Thank you. Your quote request has been submitted successfully.');
+            ->back()
+            ->with('quick_quote_success', 'Thank you. Your enquiry has been submitted successfully.');
     }
 }
