@@ -146,12 +146,7 @@
                         </button>
                     </form>
 
-                    <div
-                        class="mt-6 border border-mega-line bg-mega-soft p-4 text-sm leading-6 text-mega-muted radius-7">
-                        <p class="font-medium text-mega-black">Demo credential</p>
-                        <p class="mt-1">Email: admin@megacarpets.com</p>
-                        <p>Password: Admin@12345</p>
-                    </div>
+
                 </div>
             </div>
         </div>

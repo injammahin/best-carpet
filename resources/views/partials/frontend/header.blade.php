@@ -142,7 +142,7 @@
 
                 <div class="hidden items-center gap-3 lg:flex">
                     <a href="{{ route('frontend.quote') }}" class="mega-consult-btn">
-                        <img src="/images/image__1_-removebg-preview.png" class="h-6 w-6 text-white brightness-1 invert
+                        <img src="/images/tape-measure.png" class="h-8 w-8 text-white brightness-1 invert
                     " alt="icon">
 
                         {{ $consultationButtonText }}
