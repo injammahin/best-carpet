@@ -231,7 +231,7 @@
                                                     @foreach(($product['sizes'] ?? []) as $index => $size)
                                                         <option value="{{ $index }}" data-label="{{ $size['label'] ?? '' }}"
                                                             data-sqm="{{ $size['sqm'] ?? '' }}" data-price="{{ $size['price'] ?? 0 }}">
-                                                            {{ $size['label'] ?? 'Size' }} · {{ $size['sqm'] ?? 0 }}m²
+                                                            {{ $size['label'] ?? 'Size' }}
                                                         </option>
                                                     @endforeach
                                                 </select>

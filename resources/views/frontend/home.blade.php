@@ -452,7 +452,8 @@
                                         @foreach($typeOptions as $type)
                                             <option value="{{ $type['label'] }}" data-type-label="{{ $type['label'] }}"
                                                 data-type-price="{{ $type['price'] }}">
-                                                {{ $type['label'] }} - ${{ number_format($type['price'], 0) }}/m²
+                                                {{ $type['label'] }}
+                                                {{-- {{ $type['label'] }} - ${{ number_format($type['price'], 0) }}/m² --}}
                                             </option>
                                         @endforeach
                                     </select>
@@ -884,7 +885,7 @@
                         onerror="this.src='https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85'"
                         alt="Mega Carpets van" class="h-[420px] w-full object-cover">
 
-                    <div class="p-7">
+                    {{-- <div class="p-7">
                         <span
                             class="inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-white">
                             Call us today
@@ -894,7 +895,7 @@
                             Use this form to collect qualified quote requests. Later it can connect with email, CRM, Laravel
                             admin or SMS notification.
                         </p>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -997,7 +998,6 @@
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p class="text-sm font-normal text-mega-muted">
-                        Your request will be saved in the admin quote requests panel.
                     </p>
 
                     <button type="submit" class="btn-primary">

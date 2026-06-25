@@ -22,7 +22,7 @@
                     'colour_name' => 'Gallery image',
                 ];
             })
-            ->filter(fn ($item) => $item['image'])
+            ->filter(fn($item) => $item['image'])
             ->values();
 
         if (!$galleryItems->count()) {
@@ -365,13 +365,8 @@
                     @if($galleryItems->count() > 1)
                         <div class="mt-4 grid grid-cols-4 gap-3">
                             @foreach($galleryItems as $item)
-                                <button
-                                    type="button"
-                                    class="product-thumb-btn"
-                                    data-gallery-thumb
-                                    data-image="{{ $item['image'] }}"
-                                    data-colour-name="{{ $item['colour_name'] }}"
-                                >
+                                <button type="button" class="product-thumb-btn" data-gallery-thumb data-image="{{ $item['image'] }}"
+                                    data-colour-name="{{ $item['colour_name'] }}">
                                     <img src="{{ $item['image'] }}" alt="{{ $item['colour_name'] }}">
                                 </button>
                             @endforeach
@@ -379,11 +374,8 @@
                     @endif
                 </div>
 
-                <aside
-                    class="product-detail-card"
-                    data-product-card
-                    data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'
-                >
+                <aside class="product-detail-card" data-product-card
+                    data-product='@json($quoteData, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES)'>
                     <div class="mb-5 flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-extrabold uppercase tracking-[0.24em] text-mega-orange">
@@ -397,7 +389,8 @@
 
                         <button type="button" class="wishlist-float static" data-product-wishlist aria-label="Save product">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
+                                <path
+                                    d="M20.8 5.6c-1.6-1.8-4.2-1.9-5.9-.2L12 8.3 9.1 5.4C7.4 3.7 4.8 3.8 3.2 5.6c-1.7 2-1.5 5 .4 6.9L12 21l8.4-8.5c1.9-1.9 2.1-4.9.4-6.9z" />
                             </svg>
                         </button>
                     </div>
@@ -423,7 +416,8 @@
                         <div class="product-price-panel detail-price-panel mt-6" data-price-panel>
                             <div>
                                 <p>Fixed rug price</p>
-                                <strong data-price-text>${{ number_format((float) ($product['fixed_price'] ?? $product['price_from']), 2) }}</strong>
+                                <strong
+                                    data-price-text>${{ number_format((float) ($product['fixed_price'] ?? $product['price_from']), 2) }}</strong>
                             </div>
                         </div>
                     @else
@@ -436,13 +430,9 @@
                                 <option value="">Choose a size for rough estimate...</option>
 
                                 @foreach(($product['sizes'] ?? []) as $index => $size)
-                                    <option
-                                        value="{{ $index }}"
-                                        data-label="{{ $size['label'] ?? '' }}"
-                                        data-sqm="{{ $size['sqm'] ?? '' }}"
-                                        data-price="{{ $size['price'] ?? 0 }}"
-                                    >
-                                        {{ $size['label'] ?? 'Size' }} · {{ $size['sqm'] ?? 0 }}m²
+                                    <option value="{{ $index }}" data-label="{{ $size['label'] ?? '' }}"
+                                        data-sqm="{{ $size['sqm'] ?? '' }}" data-price="{{ $size['price'] ?? 0 }}">
+                                        {{ $size['label'] ?? 'Size' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -515,7 +505,8 @@
                         </h2>
                     </div>
 
-                    <button type="button" class="product-description-modal-close" data-close-description-modal aria-label="Close description">
+                    <button type="button" class="product-description-modal-close" data-close-description-modal
+                        aria-label="Close description">
                         ×
                     </button>
                 </div>
@@ -566,10 +557,8 @@
                                     {{ $related['short'] }}
                                 </p>
 
-                                <a
-                                    href="{{ route('frontend.product.show', $related['slug']) }}"
-                                    class="related-product-link inline-flex font-extrabold text-mega-orange"
-                                >
+                                <a href="{{ route('frontend.product.show', $related['slug']) }}"
+                                    class="related-product-link inline-flex font-extrabold text-mega-orange">
                                     Product details →
                                 </a>
                             </div>
