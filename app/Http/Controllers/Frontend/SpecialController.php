@@ -13,7 +13,6 @@ class SpecialController extends Controller
         $promos = SpecialPromo::active()
             ->orderBy('sort_order')
             ->orderByDesc('id')
-            ->take(3)
             ->get();
 
         return view('frontend.specials.index', compact('promos'));

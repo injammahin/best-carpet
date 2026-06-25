@@ -142,18 +142,8 @@
 
                 <div class="hidden items-center gap-3 lg:flex">
                     <a href="{{ route('frontend.quote') }}" class="mega-consult-btn">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path
-                                d="M4 8.5C4 5.5 6.5 3 9.5 3h5C17.5 3 20 5.5 20 8.5v7C20 18.5 17.5 21 14.5 21h-5C6.5 21 4 18.5 4 15.5v-7z" />
-                            <path d="M8 7h8" />
-                            <path d="M8 11h2" />
-                            <path d="M12 11h2" />
-                            <path d="M16 11h0.01" />
-                            <path d="M8 15h2" />
-                            <path d="M12 15h2" />
-                            <path d="M16 15h0.01" />
-                            <path d="M7 20l10-16" />
-                        </svg>
+                        <img src="/images/image__1_-removebg-preview.png" class="h-6 w-6 text-white brightness-1 invert
+                    " alt="icon">
 
                         {{ $consultationButtonText }}
                     </a>

@@ -14,11 +14,10 @@
             </p>
         </div>
 
-        @if($promos->count() < 3)
-            <a href="{{ route('admin.special-promos.create') }}" class="btn-primary w-fit">
-                Add Promo Slide
-            </a>
-        @endif
+
+        <a href="{{ route('admin.special-promos.create') }}" class="btn-primary w-fit">
+            Add Promo Slide
+        </a>
     </div>
 
     @if(session('success'))

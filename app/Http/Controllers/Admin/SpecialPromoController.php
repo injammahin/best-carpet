@@ -23,10 +23,6 @@ class SpecialPromoController extends Controller
 
     public function create(): View
     {
-        if (SpecialPromo::count() >= 3) {
-            abort(403, 'Only 3 special promo slides are allowed. Please edit or delete an existing slide.');
-        }
-
         $promo = new SpecialPromo();
 
         return view('admin.special-promos.create', compact('promo'));
@@ -34,17 +30,16 @@ class SpecialPromoController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        if (SpecialPromo::count() >= 3) {
-            return back()->with('error', 'Only 3 special promo slides are allowed.');
-        }
-
         $validated = $this->validatePromo($request, true);
-
-        $validated['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image_file')) {
             $validated['image'] = $request->file('image_file')->store('specials', 'public');
         }
+
+        unset($validated['image_file']);
+
+        $validated['is_active'] = $request->boolean('is_active');
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
         SpecialPromo::create($validated);
 
@@ -64,14 +59,17 @@ class SpecialPromoController extends Controller
     {
         $validated = $this->validatePromo($request, false);
 
-        $validated['is_active'] = $request->boolean('is_active');
-
         if ($request->hasFile('image_file')) {
             $this->deleteStoredFile($specialPromo->image);
             $validated['image'] = $request->file('image_file')->store('specials', 'public');
         } else {
             $validated['image'] = $specialPromo->image;
         }
+
+        unset($validated['image_file']);
+
+        $validated['is_active'] = $request->boolean('is_active');
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
         $specialPromo->update($validated);
 
@@ -94,7 +92,7 @@ class SpecialPromoController extends Controller
         return $request->validate([
             'title' => ['required', 'string', 'max:190'],
             'subtitle' => ['nullable', 'string', 'max:500'],
-            'image_file' => [$imageRequired ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'image_file' => [$imageRequired ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'button_text' => ['nullable', 'string', 'max:120'],
             'button_url' => ['nullable', 'string', 'max:500'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
