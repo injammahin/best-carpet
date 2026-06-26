@@ -1,41 +1,59 @@
+@php
+    $footerSettings = collect();
+
+    if (class_exists(\App\Models\SiteSetting::class)) {
+        try {
+            $footerSettings = \App\Models\SiteSetting::query()
+                ->pluck('value', 'key');
+        } catch (\Throwable $e) {
+            $footerSettings = collect();
+        }
+    }
+
+    $footerLogo = $footerSettings->get('footer_logo')
+        ?: $footerSettings->get('site_logo')
+        ?: $footerSettings->get('logo')
+        ?: 'images/logo/mega_logo_3-removebg-preview.webp';
+
+    $footerText = $footerSettings->get('footer_text')
+        ?: $footerSettings->get('footer_description')
+        ?: $footerSettings->get('site_description')
+        ?: 'Mega Carpets helps customers explore carpets, timber, hybrid flooring, laminate, vinyl and rugs with a simple quote-first showroom experience.';
+
+    $footerLogoUrl = function ($path) {
+        if (!$path) {
+            return asset('images/logo/mega_logo_3-removebg-preview.webp');
+        }
+
+        if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+
+        if (\Illuminate\Support\Str::startsWith($path, ['/storage/', 'storage/'])) {
+            return asset(ltrim($path, '/'));
+        }
+
+        if (\Illuminate\Support\Str::startsWith($path, ['/images/', 'images/'])) {
+            return asset(ltrim($path, '/'));
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
+    };
+@endphp
+
 <footer class="border-t border-mega-line bg-white text-mega-text">
     <div class="site-container py-16">
         <div class="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr]">
             <div>
                 <a href="{{ url('/') }}"
                     class="flex h-14 w-[120px] items-center justify-center bg-white shadow-sm radius-7">
-                    <img src="{{ asset('images/logo/mega_logo_3-removebg-preview.webp') }}" alt="Mega Carpets"
+                    <img src="{{ $footerLogoUrl($footerLogo) }}" alt="Mega Carpets"
                         class="h-full w-full object-contain">
                 </a>
 
                 <p class="mt-5 max-w-sm text-base font-medium leading-8 text-mega-muted">
-                    Mega Carpets helps customers explore carpets, timber, hybrid flooring, laminate, vinyl and rugs with
-                    a simple quote-first showroom experience.
+                    {{ $footerText }}
                 </p>
-
-                {{-- <div class="mt-6 flex gap-3">
-                    <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                        class="grid h-11 w-11 place-items-center bg-mega-soft text-sm font-extrabold text-mega-black transition hover:bg-mega-orange hover:text-white radius-7">
-                        F
-                    </a>
-
-                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"
-                        aria-label="Instagram"
-                        class="grid h-11 w-11 place-items-center bg-mega-soft text-sm font-extrabold text-mega-black transition hover:bg-mega-orange hover:text-white radius-7">
-                        IG
-                    </a>
-
-                    <a href="https://www.pinterest.com/" target="_blank" rel="noopener noreferrer"
-                        aria-label="Pinterest"
-                        class="grid h-11 w-11 place-items-center bg-mega-soft text-sm font-extrabold text-mega-black transition hover:bg-mega-orange hover:text-white radius-7">
-                        P
-                    </a>
-
-                    <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
-                        class="grid h-11 w-11 place-items-center bg-mega-soft text-sm font-extrabold text-mega-black transition hover:bg-mega-orange hover:text-white radius-7">
-                        YT
-                    </a>
-                </div> --}}
             </div>
 
             <div>
