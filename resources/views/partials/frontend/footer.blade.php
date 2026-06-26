@@ -45,8 +45,7 @@
     <div class="site-container py-16">
         <div class="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr]">
             <div>
-                <a href="{{ url('/') }}"
-                    class="flex h-14 w-[120px] items-center justify-center bg-white shadow-sm radius-7">
+                <a href="{{ url('/') }}" class="flex h-18 w-[145px] items-center justify-center shadow-sm radius-7">
                     <img src="{{ $footerLogoUrl($footerLogo) }}" alt="Mega Carpets"
                         class="h-full w-full object-contain">
                 </a>

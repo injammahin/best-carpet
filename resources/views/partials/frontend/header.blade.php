@@ -131,7 +131,7 @@
         <div class="site-container">
             <div class="flex h-[82px] items-center justify-between gap-4">
                 <a href="{{ route('frontend.home') }}" class="flex shrink-0 items-center gap-4">
-                    <div class="mega-logo-card">
+                    <div class="mega-logo-card !h-[72px] !w-[150px] md:!h-[82px] md:!w-[175px]">
                         <img src="{{ $siteLogo }}" alt="{{ $siteName }}" class="h-full w-full object-contain">
                     </div>
 
