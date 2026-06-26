@@ -149,7 +149,7 @@
                                 class="input-clean">{{ old('footer_description', $settings['footer_description']) }}</textarea>
                         </div>
 
-                        <div class="grid gap-5 md:grid-cols-2">
+                        {{-- <div class="grid gap-5 md:grid-cols-2">
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-mega-text">Copyright Text</label>
                                 <input type="text" name="footer_copyright"
@@ -163,9 +163,9 @@
                                 <input type="text" name="footer_credit"
                                     value="{{ old('footer_credit', $settings['footer_credit']) }}" class="input-clean">
                             </div>
-                        </div>
+                        </div> --}}
 
-                        <div class="grid gap-5 md:grid-cols-3">
+                        {{-- <div class="grid gap-5 md:grid-cols-3">
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-mega-text">Column 1 Title</label>
                                 <input type="text" name="footer_help_title"
@@ -198,12 +198,12 @@
                                 <textarea name="footer_touch_links" rows="7"
                                     class="input-clean font-mono text-sm">{{ old('footer_touch_links', $settings['footer_touch_links']) }}</textarea>
                             </div>
-                        </div>
+                        </div> --}}
 
-                        <div class="rounded-[14px] border border-mega-line bg-mega-soft p-4 text-sm text-mega-muted">
+                        {{-- <div class="rounded-[14px] border border-mega-line bg-mega-soft p-4 text-sm text-mega-muted">
                             Link format: <strong>Label|URL</strong>, one item per line. Example: <strong>Book
                                 Quote|/free-measure-quote</strong>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -249,7 +249,7 @@
                     </div>
                 </div>
 
-                <div class="clean-card bg-white p-6">
+                {{-- <div class="clean-card bg-white p-6">
                     <p class="section-label mb-2">Social Links</p>
 
                     <div class="space-y-4">
@@ -266,11 +266,12 @@
 
                         <label
                             class="flex items-center gap-2 rounded-[14px] border border-mega-line bg-mega-soft p-4 text-sm font-semibold">
-                            <input type="checkbox" name="show_footer_socials" value="1" @checked(old('show_footer_socials', $settings['show_footer_socials']) == '1')>
+                            <input type="checkbox" name="show_footer_socials" value="1" @checked(old('show_footer_socials',
+                                $settings['show_footer_socials'])=='1' )>
                             Show footer social buttons
                         </label>
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="clean-card bg-mega-black p-6 text-white">
                     <p class="text-xs font-medium uppercase tracking-[0.22em] text-mega-orange">

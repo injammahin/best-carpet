@@ -194,9 +194,9 @@
         <div class="site-container">
             <div class="mx-auto mb-10 max-w-3xl text-center">
                 <p class="section-kicker">Shop by category</p>
-                <h2 class="section-title-premium">A clean flooring catalogue for serious buyers.</h2>
+                {{-- <h2 class="section-title-premium">A clean flooring catalogue for serious buyers.</h2>
                 <p class="mx-auto section-lead">Each category sends visitors to the proper product page instead of keeping
-                    them on the homepage.</p>
+                    them on the homepage.</p> --}}
             </div>
 
             <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -646,12 +646,12 @@
         <div class="site-container">
             <div class="mx-auto mb-10 max-w-4xl text-center">
                 <p class="section-kicker">Services</p>
-                <h2 class="text-4xl font-semibold tracking-[-0.055em] text-white md:text-5xl">
+                {{-- <h2 class="text-4xl font-semibold tracking-[-0.055em] text-white md:text-5xl">
                     Built for real flooring enquiries, not only pretty browsing.
                 </h2>
                 <p class="mx-auto mt-4 max-w-3xl text-lg font-normal leading-8 text-white/60">
                     Every section is designed to move a customer toward consultation, measurement and a practical quote.
-                </p>
+                </p> --}}
             </div>
 
             <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -674,7 +674,7 @@
         </div>
     </section>
 
-    <section id="projects" class="bg-white py-20">
+    {{-- <section id="projects" class="bg-white py-20">
         <div class="site-container">
             <div class="mx-auto mb-10 max-w-4xl text-center">
                 <p class="section-kicker">Recent work concept</p>
@@ -687,34 +687,34 @@
 
             <div class="grid gap-5 lg:grid-cols-3">
                 @foreach($projects as $project)
-                    <article class="group relative h-72 overflow-hidden shadow-soft radius-7">
-                        <img src="{{ $project['image'] }}" alt="{{ $project['title'] }}"
-                            class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                <article class="group relative h-72 overflow-hidden shadow-soft radius-7">
+                    <img src="{{ $project['image'] }}" alt="{{ $project['title'] }}"
+                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
 
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
 
-                        <div class="absolute bottom-5 left-5 right-5 text-white">
-                            <p class="text-xs font-medium uppercase tracking-[0.2em] text-mega-orange">
-                                {{ $project['location'] }}
-                            </p>
-                            <h3 class="mt-2 text-2xl font-semibold tracking-tight">{{ $project['title'] }}</h3>
-                            <p class="mt-1 text-sm font-normal text-white/75">{{ $project['type'] }}</p>
-                        </div>
-                    </article>
+                    <div class="absolute bottom-5 left-5 right-5 text-white">
+                        <p class="text-xs font-medium uppercase tracking-[0.2em] text-mega-orange">
+                            {{ $project['location'] }}
+                        </p>
+                        <h3 class="mt-2 text-2xl font-semibold tracking-tight">{{ $project['title'] }}</h3>
+                        <p class="mt-1 text-sm font-normal text-white/75">{{ $project['type'] }}</p>
+                    </div>
+                </article>
                 @endforeach
             </div>
         </div>
-    </section>
+    </section> --}}
 
     <section id="reviews" class="bg-[#f7f3ed] py-20">
         <div class="site-container">
             <div class="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end">
                 <div class="max-w-3xl">
                     <p class="section-kicker">Customer reviews</p>
-                    <h2 class="section-title-premium">Real feedback that builds trust.</h2>
+                    {{-- <h2 class="section-title-premium">Real feedback that builds trust.</h2>
                     <p class="section-lead">
                         Simple, premium review cards from the admin panel. Long reviews open in a clean modal.
-                    </p>
+                    </p> --}}
                 </div>
 
                 <div class="flex gap-2">
@@ -1013,9 +1013,9 @@
             <div>
                 <p class="section-kicker">FAQ</p>
                 <h2 class="section-title-premium">Clear answers for customers.</h2>
-                <p class="section-lead">
+                {{-- <p class="section-lead">
                     Manage these questions from the admin panel.
-                </p>
+                </p> --}}
             </div>
 
             <div class="space-y-3">

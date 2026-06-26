@@ -170,7 +170,7 @@
 }
 
 .mega-product-link {
-    font-size: 14px;
+    font-size: 16px;
     padding: 20px 16px;
     font-weight: 700;
 }
@@ -917,7 +917,7 @@ h6,
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 2px;
+    gap: 7px;
     min-width: 0;
 }
 
@@ -1130,8 +1130,8 @@ h6,
 @media (max-width: 1279px) {
     .mega-product-link {
         padding-left: 10px;
-        padding-right: 10px;
-        font-size: 13px;
+        padding-right: 20px;
+        font-size: 15px;
     }
 
     .mega-product-right {

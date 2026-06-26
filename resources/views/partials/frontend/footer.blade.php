@@ -13,7 +13,7 @@
                     a simple quote-first showroom experience.
                 </p>
 
-                <div class="mt-6 flex gap-3">
+                {{-- <div class="mt-6 flex gap-3">
                     <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
                         class="grid h-11 w-11 place-items-center bg-mega-soft text-sm font-extrabold text-mega-black transition hover:bg-mega-orange hover:text-white radius-7">
                         F
@@ -35,7 +35,7 @@
                         class="grid h-11 w-11 place-items-center bg-mega-soft text-sm font-extrabold text-mega-black transition hover:bg-mega-orange hover:text-white radius-7">
                         YT
                     </a>
-                </div>
+                </div> --}}
             </div>
 
             <div>
